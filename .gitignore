@@ -22,3 +22,11 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+# vendoring
+.vendor
+.bundle
+
+# binary
+easy-vpn
+

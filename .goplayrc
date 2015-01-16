@@ -1,0 +1,60 @@
+# Configuration file for goplay
+# https://github.com/JamesClonk/goplay
+
+# Forces recompilation every time
+#
+# Example:
+#  ForceCompile Yes
+#
+# Default:
+#  ForceCompile No
+ForceCompile Yes
+
+# Use "go build" for building complete binary out of script directory
+#
+# Example:
+#  CompleteBuild Yes
+#
+# Default:
+#  CompleteBuild No
+CompleteBuild yes
+
+# Watch for source file changes and recompile and reload if necessary
+# Enables ForceCompile
+#
+# Example:
+#  HotReload Yes
+#
+# Default:
+#  HotReload No
+HotReload No
+
+# Watch recursively for source file changes, all subdirectories/files included
+# Commonly be used in combination with CompleteBuild to build/watch an entire directory and it's subdirectories
+#
+# Example:
+#  HotReloadRecursive Yes
+#
+# Default:
+#  HotReloadRecursive No
+HotReloadRecursive No
+
+# File extensions to watch for file changes, for hot reload
+# Commonly be used in combination with CompleteBuild to build/watch an entire project and its directory (and subdirectories)
+#
+# Example:
+#  HotReloadWatchExtensions go,html,tmpl,inc,goplayrc
+#
+# Default:
+#  HotReloadWatchExtensions go
+HotReloadWatchExtensions go,html,json
+
+# Goplay directory for storing created binary files
+#
+# Example:
+#  GoplayDirectory /tmp/.goplay_bin
+#
+# Default:
+#  GoplayDirectory .goplay
+GoplayDirectory /tmp/.goplay_bin
+

@@ -3,6 +3,8 @@ a simple commandline tool to spin up a VPN server on a cloud VPS that self-destr
 
 --------
 
+* Requires Go 1.4+
+
 ## TODO
 
 * docker-pptpd project/image..

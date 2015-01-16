@@ -1,0 +1,15 @@
+provider = "vultr"
+
+[providers.digitalocean]
+api_key = "abcdefg123xyz"
+region = 3
+
+[providers.vultr]
+api_key = "xyzabcdefg999"
+region = 7
+
+[options]
+max_idletime = 20 # minutes
+max_uptime = 300 # minutes
+vpn_autoconnect = false
+

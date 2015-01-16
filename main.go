@@ -12,8 +12,6 @@ import (
 
 const VERSION = "1.0.0"
 
-var config *Config
-
 func main() {
 	app := cli.NewApp()
 	app.Name = "easy-vpn"
@@ -90,19 +88,23 @@ func main() {
 }
 
 func startVpn(c *cli.Context) {
-	parseGlobalOptions(c)
+	config := parseGlobalOptions(c)
+	fmt.Printf("[%v]\n", config) // TODO: remove!
 }
 
 func destroyVpn(c *cli.Context) {
-	parseGlobalOptions(c)
+	//config := parseGlobalOptions(c)
 }
 
 func showVpn(c *cli.Context) {
-	parseGlobalOptions(c)
+	//config := parseGlobalOptions(c)
 }
 
-func parseGlobalOptions(c *cli.Context) {
-	config = loadConfiguration(c.GlobalString("config"))
+func parseGlobalOptions(c *cli.Context) *Config {
+	config, err := loadConfiguration(c.GlobalString("config"))
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	if c.GlobalIsSet("provider") {
 		config.Provider = c.GlobalString("provider")
@@ -128,5 +130,5 @@ func parseGlobalOptions(c *cli.Context) {
 		config.Options.Uptime = int(uptime)
 	}
 
-	fmt.Printf("%v\n", config)
+	return config
 }

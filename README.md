@@ -19,7 +19,7 @@ simple shellscript to spin up a VPN server on a cloud VPS that self-destructs af
 	- then installs docker on it..
 	- then runs docker-pptpd image
 	- destroys vm after use (either with on-demand option, or by telling vm to only be alive for a max. of x hours after start and then destroying itself, done through the selfdestruct script that was installed by default upon vm creation, with default value of 6 hours)
-	- automatically put the following self-destruct script / contrab entry onto VM: shellscript that runs every few minutes (from crontab) that runs the vm selfdestruct script if no pptp connection was made in the last 15min.
+	- automatically put the following self-destruct script onto VM and run it in background: shellscript that has sleep-loop of few minutes with check inside to run the vm selfdestruct script if no pptp connection was made in the last 15min.
 	- as a last (optional) step after setup of vm, automatically add vpn-client credentials to current machine and connect to vpn. (auto-setup vpn client basically)
 	- can also list all currently running vpn vm images, to check / make sure if vm really was destroyed after use.. (don't want to pay more money than necessary ;-))
 

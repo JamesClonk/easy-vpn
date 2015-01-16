@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,13 +9,12 @@ import (
 
 var testConfig *Config
 
-func TestMain(m *testing.M) {
+func init() {
 	var err error
 	testConfig, err = loadConfiguration("fixtures/config_test.toml")
 	if err != nil {
 		log.Println(err)
 	}
-	os.Exit(m.Run())
 }
 
 func Test_Config_LoadConfiguration(t *testing.T) {

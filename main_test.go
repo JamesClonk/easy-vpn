@@ -2,11 +2,18 @@ package main
 
 import (
 	"flag"
+	"os"
 	"testing"
 
 	"github.com/codegangsta/cli"
 	"github.com/stretchr/testify/assert"
 )
+
+func TestMain(m *testing.M) {
+	// there can only be 1 TestMain for the whole package main.
+	// setup/teardown everything here thats needed for all tests.
+	os.Exit(m.Run())
+}
 
 func Test_Main_ParseGlobalOptions(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)

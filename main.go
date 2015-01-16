@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -88,8 +87,7 @@ func main() {
 }
 
 func startVpn(c *cli.Context) {
-	config := parseGlobalOptions(c)
-	fmt.Printf("[%v]\n", config) // TODO: remove!
+	//config := parseGlobalOptions(c)
 }
 
 func destroyVpn(c *cli.Context) {

@@ -1,12 +1,18 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/codegangsta/cli"
 )
 
 const VERSION = "1.0.0"
+
+var config *Config
 
 func main() {
 	app := cli.NewApp()
@@ -18,13 +24,18 @@ func main() {
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
+			Name:  "config, c",
+			Value: "easy-vpn.toml",
+			Usage: "specify which configuration file to use",
+		},
+		cli.StringFlag{
 			Name:  "provider, p",
 			Value: "digitalocean",
 			Usage: "specify which cloud VPS provider to use",
 		},
 		cli.StringFlag{
-			Name:  "connect, c",
-			Value: "yes",
+			Name:  "autoconnect, a",
+			Value: "true",
 			Usage: "do automatic VPN connect after a VPS was started?",
 		},
 		cli.StringFlag{
@@ -51,7 +62,7 @@ func main() {
 			},
 		},
 		Action: func(c *cli.Context) {
-			StartVpn(c)
+			startVpn(c)
 		},
 	}, {
 		Name:        "down",
@@ -59,7 +70,7 @@ func main() {
 		Usage:       "shutdown and destroy a VPS",
 		Description: ".....", // TODO: add description, tell that it requires 1 argument: the VPS name/id to destroy
 		Action: func(c *cli.Context) {
-			DestroyVpn(c)
+			destroyVpn(c)
 		},
 	}, {
 		Name:        "show",
@@ -67,7 +78,7 @@ func main() {
 		Usage:       "shows all current VPN-VPS and their status",
 		Description: ".....", // TODO: add description, will list all current VPS and their status that match naming criteria
 		Action: func(c *cli.Context) {
-			ShowVpn(c)
+			showVpn(c)
 		},
 	}}
 
@@ -78,11 +89,44 @@ func main() {
 	app.RunAndExitOnError()
 }
 
-func StartVpn(c *cli.Context) {
+func startVpn(c *cli.Context) {
+	parseGlobalOptions(c)
 }
 
-func DestroyVpn(c *cli.Context) {
+func destroyVpn(c *cli.Context) {
+	parseGlobalOptions(c)
 }
 
-func ShowVpn(c *cli.Context) {
+func showVpn(c *cli.Context) {
+	parseGlobalOptions(c)
+}
+
+func parseGlobalOptions(c *cli.Context) {
+	config = loadConfiguration(c.GlobalString("config"))
+
+	if c.GlobalIsSet("provider") {
+		config.Provider = c.GlobalString("provider")
+	}
+
+	if c.GlobalIsSet("autoconnect") {
+		config.Options.Autoconnect = strings.ToLower(c.GlobalString("autoconnect")) == "true"
+	}
+
+	if c.GlobalIsSet("idletime") {
+		idletime, err := strconv.ParseInt(c.GlobalString("idletime"), 10, 32)
+		if err != nil {
+			log.Fatalf("Invalid value for --idletime option given: %v\n", c.GlobalString("idletime"))
+		}
+		config.Options.Idletime = int(idletime)
+	}
+
+	if c.GlobalIsSet("uptime") {
+		uptime, err := strconv.ParseInt(c.GlobalString("uptime"), 10, 32)
+		if err != nil {
+			log.Fatalf("Invalid value for --uptime option given: %v\n", c.GlobalString("uptime"))
+		}
+		config.Options.Uptime = int(uptime)
+	}
+
+	fmt.Printf("%v\n", config)
 }

@@ -20,6 +20,8 @@ func init() {
 func Test_Config_LoadConfiguration(t *testing.T) {
 	if assert.NotNil(t, testConfig) {
 		assert.Equal(t, "vultr", testConfig.Provider)
+		assert.Equal(t, "fixtures/vps_rsa", testConfig.PrivateKeyFile)
+		assert.Equal(t, "fixtures/vps_rsa.pub", testConfig.PublicKeyFile)
 	}
 }
 

@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -29,6 +32,11 @@ func main() {
 			Name:  "provider, p",
 			Value: "digitalocean",
 			Usage: "specify which cloud VPS provider to use",
+		},
+		cli.StringFlag{
+			Name:  "api-key, k",
+			Value: "abc123xyz",
+			Usage: "API-Key for cloud VPS provider",
 		},
 		cli.StringFlag{
 			Name:  "autoconnect, a",
@@ -95,7 +103,18 @@ func destroyVpn(c *cli.Context) {
 }
 
 func showVpn(c *cli.Context) {
-	//config := parseGlobalOptions(c)
+	config := parseGlobalOptions(c)
+	resp, err := http.Get(urlWithApiKey(config, `https://api.vultr.com/v1/sshkey/list?api_key=`))
+	if err != nil {
+		log.Fatal(err) // TODO: better error message and abort
+	}
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err) // TODO: better error message and abort
+	}
+
+	fmt.Println(string(data))
 }
 
 func parseGlobalOptions(c *cli.Context) *Config {
@@ -106,6 +125,13 @@ func parseGlobalOptions(c *cli.Context) *Config {
 
 	if c.GlobalIsSet("provider") {
 		config.Provider = c.GlobalString("provider")
+	}
+
+	if c.GlobalIsSet("api-key") {
+		config.Providers[config.Provider] = Provider{
+			ApiKey: c.GlobalString("api-key"),
+			Region: config.Providers[config.Provider].Region,
+		}
 	}
 
 	if c.GlobalIsSet("autoconnect") {
@@ -129,4 +155,12 @@ func parseGlobalOptions(c *cli.Context) *Config {
 	}
 
 	return config
+}
+
+func getInstalledSshKeys() {
+	123-
+}
+
+func urlWithApiKey(c *Config, url string) string {
+	return url + c.Providers[c.Provider].ApiKey
 }

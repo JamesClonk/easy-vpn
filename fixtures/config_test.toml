@@ -1,4 +1,6 @@
 provider = "vultr"
+ssh_private_key = "fixtures/vps_rsa"
+ssh_public_key = "fixtures/vps_rsa.pub"
 
 [providers.digitalocean]
 api_key = "abcdefg123xyz"

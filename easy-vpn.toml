@@ -1,4 +1,6 @@
 provider = "digitalocean"
+ssh_private_key = "~/.ssh/vps_rsa"
+ssh_public_key = "~/.ssh/vps_rsa.pub"
 
 [providers.digitalocean]
 api_key = "abcdefg123xyz"

@@ -23,6 +23,10 @@ type Vultr struct {
 	Config *config.Config
 }
 
+func (v Vultr) GetProviderName() string {
+	return "VULTR"
+}
+
 func (v Vultr) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 	resp, err := http.Get(v.urlWithApiKey(`https://api.vultr.com/v1/sshkey/list`))
 	if err != nil {

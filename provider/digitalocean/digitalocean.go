@@ -26,6 +26,10 @@ type DO struct {
 	Config *config.Config
 }
 
+func (d DO) GetProviderName() string {
+	return "DigitalOcean"
+}
+
 func (d DO) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 	resp, err := d.doGet(`https://api.digitalocean.com/v2/account/keys`)
 	if err != nil {

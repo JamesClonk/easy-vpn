@@ -43,7 +43,7 @@ func Test_Config_LoadConfiguration_Providers(t *testing.T) {
 }
 
 func Test_Config_LoadConfiguration_NoFile(t *testing.T) {
-	config, err := LoadConfiguration("../fixtures/does_not_exist.toml")
-	assert.Nil(t, config)
+	cfg, err := LoadConfiguration("../fixtures/does_not_exist.toml")
+	assert.Nil(t, cfg)
 	assert.NotNil(t, err)
 }

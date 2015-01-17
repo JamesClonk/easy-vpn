@@ -31,15 +31,35 @@ func Test_Main_ParseGlobalOptions(t *testing.T) {
 	assert.Nil(t, set.Parse([]string{"--uptime", "777"}))
 
 	c := cli.NewContext(nil, nil, set)
-	config := parseGlobalOptions(c)
 
-	if assert.NotNil(t, config) {
-		assert.Equal(t, "AWS", config.Provider)
-		assert.Equal(t, "abcdef1234567890", config.Providers[config.Provider].ApiKey)
-		assert.Equal(t, true, config.Options.Autoconnect)
-		assert.Equal(t, 123, config.Options.Idletime)
-		assert.Equal(t, 777, config.Options.Uptime)
+	cfg := parseGlobalOptions(c)
+	if assert.NotNil(t, cfg) {
+		assert.Equal(t, "AWS", cfg.Provider)
+		assert.Equal(t, "abcdef1234567890", cfg.Providers[cfg.Provider].ApiKey)
+		assert.Equal(t, true, cfg.Options.Autoconnect)
+		assert.Equal(t, 123, cfg.Options.Idletime)
+		assert.Equal(t, 777, cfg.Options.Uptime)
 	}
 }
 
-// TODO: add test for getProvider()
+func Test_Main_GetProvider(t *testing.T) {
+	set := flag.NewFlagSet("test", 0)
+	set.String("config", "fixtures/config_test.toml", "...")
+	c := cli.NewContext(nil, nil, set)
+
+	cfg := parseGlobalOptions(c)
+	if assert.NotNil(t, cfg) {
+		assert.Equal(t, "vultr", cfg.Provider)
+	}
+
+	p1 := getProvider(cfg)
+	if assert.NotNil(t, p1) {
+		assert.Equal(t, "VULTR", p1.GetProviderName())
+	}
+
+	cfg.Provider = "digitalocean"
+	p2 := getProvider(cfg)
+	if assert.NotNil(t, p2) {
+		assert.Equal(t, "DigitalOcean", p2.GetProviderName())
+	}
+}

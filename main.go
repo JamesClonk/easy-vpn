@@ -97,7 +97,10 @@ func main() {
 }
 
 func startVpn(c *cli.Context) {
-	//config := parseGlobalOptions(c)
+	cfg := parseGlobalOptions(c)
+	keyId := getEasyVpnSshKeyId(cfg)
+
+	fmt.Printf("KEY-ID: %v\n", keyId) // TODO: remove!
 }
 
 func destroyVpn(c *cli.Context) {
@@ -105,10 +108,7 @@ func destroyVpn(c *cli.Context) {
 }
 
 func showVpn(c *cli.Context) {
-	cfg := parseGlobalOptions(c)
-	keyId := getEasyVpnSshKeyId(cfg)
-
-	fmt.Printf("KEY-ID: %v\n", keyId) // TODO: remove!
+	//config := parseGlobalOptions(c)
 }
 
 func parseGlobalOptions(c *cli.Context) *config.Config {

@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/JamesClonk/easy-vpn/config"
+	"github.com/JamesClonk/easy-vpn/provider"
 )
 
-func getEasyVpnSshKeyId(cfg *config.Config) (keyId string) {
-	p := getProvider(cfg)
-	key := readPublicKey(cfg)
+func getEasyVpnSshKeyId(p provider.API) (keyId string) {
+	key := readPublicKey(p.GetConfig())
 
 	// first lets get all currently installed ssh-keys
 	keys, err := p.GetInstalledSshKeys()

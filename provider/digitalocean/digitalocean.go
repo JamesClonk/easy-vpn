@@ -128,7 +128,7 @@ func (d DO) deleteSshKey(id string) error {
 	return nil
 }
 
-func (d *DO) GetConfig() *config.Config {
+func (d DO) GetConfig() *config.Config {
 	return d.Config
 }
 

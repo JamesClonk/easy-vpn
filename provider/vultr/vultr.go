@@ -124,7 +124,7 @@ func (v Vultr) UpdateSshKey(id, name, key string) (string, error) {
 	return id, nil
 }
 
-func (v *Vultr) GetConfig() *config.Config {
+func (v Vultr) GetConfig() *config.Config {
 	return v.Config
 }
 

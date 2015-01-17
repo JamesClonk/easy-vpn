@@ -101,7 +101,8 @@ func main() {
 
 func startVpn(c *cli.Context) {
 	cfg := parseGlobalOptions(c)
-	keyId := getEasyVpnSshKeyId(cfg)
+	p := getProvider(cfg)
+	keyId := getEasyVpnSshKeyId(p)
 
 	fmt.Printf("KEY-ID: %v\n", keyId) // TODO: remove!
 }

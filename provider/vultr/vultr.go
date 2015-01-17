@@ -32,6 +32,7 @@ func (v Vultr) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -74,6 +75,7 @@ func (v Vultr) InstallNewSshKey(name, key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -89,16 +91,16 @@ func (v Vultr) InstallNewSshKey(name, key string) (string, error) {
 	}
 
 	result := struct {
-		SSHKEYID string
+		Id string `json:"SSHKEYID"`
 	}{}
 	if err := json.Unmarshal(body, &result); err != nil {
 		return "", err
 	}
 
-	return result.SSHKEYID, nil
+	return result.Id, nil
 }
 
-func (v Vultr) UpdateSshKey(id, name, key string) error {
+func (v Vultr) UpdateSshKey(id, name, key string) (string, error) {
 	resp, err := http.PostForm(v.urlWithApiKey(`https://api.vultr.com/v1/sshkey/update`),
 		url.Values{
 			"SSHKEYID": {id},
@@ -106,19 +108,20 @@ func (v Vultr) UpdateSshKey(id, name, key string) error {
 			"ssh_key":  {key},
 		})
 	if err != nil {
-		return err
+		return "", err
 	}
+	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		errors.New(string(body))
+		return "", errors.New(string(body))
 	}
 
-	return nil
+	return id, nil
 }
 
 func (v *Vultr) GetConfig() *config.Config {

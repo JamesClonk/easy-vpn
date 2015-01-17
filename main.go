@@ -14,7 +14,10 @@ import (
 	"github.com/codegangsta/cli"
 )
 
-const VERSION = "1.0.0"
+const (
+	VERSION            = "1.0.0"
+	EASYVPN_IDENTIFIER = "easy-vpn"
+)
 
 func main() {
 	app := cli.NewApp()

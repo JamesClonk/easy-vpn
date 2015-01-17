@@ -23,7 +23,7 @@ func getEasyVpnSshKeyId(cfg *config.Config) (keyId string) {
 	// then check to see if easy-vpn ssh-key is already installed
 	keyInstalled := false
 	for _, key := range keys {
-		if key.Name == "easy-vpn" {
+		if key.Name == EASYVPN_IDENTIFIER {
 			keyId = key.Id
 			keyInstalled = true
 			break
@@ -32,12 +32,13 @@ func getEasyVpnSshKeyId(cfg *config.Config) (keyId string) {
 
 	// if it is already installed, update it to make sure its public-key is up-to-date
 	if keyInstalled {
-		if err := p.UpdateSshKey(keyId, "easy-vpn", key); err != nil {
+		keyId, err = p.UpdateSshKey(keyId, EASYVPN_IDENTIFIER, key)
+		if err != nil {
 			log.Println("Could not update SSH-Key")
 			log.Fatal(err)
 		}
 	} else { // otherwise, install as a new ssh-key
-		keyId, err = p.InstallNewSshKey("easy-vpn", key)
+		keyId, err = p.InstallNewSshKey(EASYVPN_IDENTIFIER, key)
 		if err != nil {
 			log.Println("Could not install SSH-Key")
 			log.Fatal(err)

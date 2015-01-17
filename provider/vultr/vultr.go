@@ -13,6 +13,8 @@ import (
 	"github.com/JamesClonk/easy-vpn/provider"
 )
 
+var baseUrl = `https://api.vultr.com/v1`
+
 type SshKey struct {
 	Id   string `json:"SSHKEYID"`
 	Name string `json:"name"`
@@ -28,7 +30,7 @@ func (v Vultr) GetProviderName() string {
 }
 
 func (v Vultr) GetInstalledSshKeys() (data []provider.SshKey, err error) {
-	resp, err := http.Get(v.urlWithApiKey(`https://api.vultr.com/v1/sshkey/list`))
+	resp, err := http.Get(v.urlWithApiKey(baseUrl + `/sshkey/list`))
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +69,7 @@ func (v Vultr) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 }
 
 func (v Vultr) InstallNewSshKey(name, key string) (string, error) {
-	resp, err := http.PostForm(v.urlWithApiKey(`https://api.vultr.com/v1/sshkey/create`),
+	resp, err := http.PostForm(v.urlWithApiKey(baseUrl+`/sshkey/create`),
 		url.Values{
 			"name":    {name},
 			"ssh_key": {key},
@@ -101,7 +103,7 @@ func (v Vultr) InstallNewSshKey(name, key string) (string, error) {
 }
 
 func (v Vultr) UpdateSshKey(id, name, key string) (string, error) {
-	resp, err := http.PostForm(v.urlWithApiKey(`https://api.vultr.com/v1/sshkey/update`),
+	resp, err := http.PostForm(v.urlWithApiKey(baseUrl+`/sshkey/update`),
 		url.Values{
 			"SSHKEYID": {id},
 			"name":     {name},

@@ -13,6 +13,8 @@ import (
 	"github.com/JamesClonk/easy-vpn/provider"
 )
 
+var baseUrl = `https://api.digitalocean.com/v2`
+
 type SshKeys struct {
 	Keys []SshKey `json:"ssh_keys"`
 }
@@ -33,7 +35,7 @@ func (d DO) GetProviderName() string {
 }
 
 func (d DO) GetInstalledSshKeys() (data []provider.SshKey, err error) {
-	resp, err := d.doGet(`https://api.digitalocean.com/v2/account/keys`)
+	resp, err := d.doGet(baseUrl + `/account/keys`)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +70,7 @@ func (d DO) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 
 func (d DO) InstallNewSshKey(name, key string) (string, error) {
 	values := fmt.Sprintf(`{"name": "%v", "public_key": "%v"}`, name, key)
-	resp, err := d.doPost(`https://api.digitalocean.com/v2/account/keys`, values)
+	resp, err := d.doPost(baseUrl+`/account/keys`, values)
 	if err != nil {
 		return "", err
 	}
@@ -110,7 +112,7 @@ func (d DO) UpdateSshKey(id, name, key string) (string, error) {
 }
 
 func (d DO) deleteSshKey(id string) error {
-	resp, err := d.doDelete(`https://api.digitalocean.com/v2/account/keys/` + id)
+	resp, err := d.doDelete(baseUrl + `/account/keys/` + id)
 	if err != nil {
 		return err
 	}

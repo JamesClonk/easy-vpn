@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"github.com/BurntSushi/toml"
@@ -23,7 +23,7 @@ type Options struct {
 	Autoconnect bool `toml:"vpn_autoconnect"`
 }
 
-func loadConfiguration(filename string) (config *Config, err error) {
+func LoadConfiguration(filename string) (config *Config, err error) {
 	if _, err = toml.DecodeFile(filename, &config); err != nil {
 		return nil, err
 	}

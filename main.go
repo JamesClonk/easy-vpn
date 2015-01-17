@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/JamesClonk/easy-vpn/config"
+	"github.com/JamesClonk/easy-vpn/provider"
+	"github.com/JamesClonk/easy-vpn/provider/digitalocean"
+	"github.com/JamesClonk/easy-vpn/provider/vultr"
 	"github.com/codegangsta/cli"
 )
 
@@ -103,39 +105,36 @@ func destroyVpn(c *cli.Context) {
 }
 
 func showVpn(c *cli.Context) {
-	config := parseGlobalOptions(c)
-	resp, err := http.Get(urlWithApiKey(config, `https://api.vultr.com/v1/sshkey/list?api_key=`))
-	if err != nil {
-		log.Fatal(err) // TODO: better error message and abort
-	}
+	cfg := parseGlobalOptions(c)
+	p := getProvider(cfg)
 
-	data, err := ioutil.ReadAll(resp.Body)
+	keys, err := p.GetInstalledSshKeys()
 	if err != nil {
-		log.Fatal(err) // TODO: better error message and abort
+		log.Println("Could not retrieve list of installed SSH-Keys")
+		log.Fatal(err)
 	}
-
-	fmt.Println(string(data))
+	fmt.Printf("%v\n", keys) // TODO: remove!
 }
 
-func parseGlobalOptions(c *cli.Context) *Config {
-	config, err := loadConfiguration(c.GlobalString("config"))
+func parseGlobalOptions(c *cli.Context) *config.Config {
+	cfg, err := config.LoadConfiguration(c.GlobalString("config"))
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if c.GlobalIsSet("provider") {
-		config.Provider = c.GlobalString("provider")
+		cfg.Provider = c.GlobalString("provider")
 	}
 
 	if c.GlobalIsSet("api-key") {
-		config.Providers[config.Provider] = Provider{
+		cfg.Providers[cfg.Provider] = config.Provider{
 			ApiKey: c.GlobalString("api-key"),
-			Region: config.Providers[config.Provider].Region,
+			Region: cfg.Providers[cfg.Provider].Region,
 		}
 	}
 
 	if c.GlobalIsSet("autoconnect") {
-		config.Options.Autoconnect = strings.ToLower(c.GlobalString("autoconnect")) == "true"
+		cfg.Options.Autoconnect = strings.ToLower(c.GlobalString("autoconnect")) == "true"
 	}
 
 	if c.GlobalIsSet("idletime") {
@@ -143,7 +142,7 @@ func parseGlobalOptions(c *cli.Context) *Config {
 		if err != nil {
 			log.Fatalf("Invalid value for --idletime option given: %v\n", c.GlobalString("idletime"))
 		}
-		config.Options.Idletime = int(idletime)
+		cfg.Options.Idletime = int(idletime)
 	}
 
 	if c.GlobalIsSet("uptime") {
@@ -151,16 +150,22 @@ func parseGlobalOptions(c *cli.Context) *Config {
 		if err != nil {
 			log.Fatalf("Invalid value for --uptime option given: %v\n", c.GlobalString("uptime"))
 		}
-		config.Options.Uptime = int(uptime)
+		cfg.Options.Uptime = int(uptime)
 	}
 
-	return config
+	return cfg
 }
 
-func getInstalledSshKeys() {
-	123-
-}
-
-func urlWithApiKey(c *Config, url string) string {
-	return url + c.Providers[c.Provider].ApiKey
+func getProvider(cfg *config.Config) provider.API {
+	switch cfg.Provider {
+	case "digitalocean":
+		return digitalocean.DO{Config: cfg}
+	case "vultr":
+		return vultr.Vultr{Config: cfg}
+	case "aws":
+		log.Fatal("Not yet implemented!")
+	default:
+		log.Fatal("Unknown provider!")
+	}
+	return nil
 }

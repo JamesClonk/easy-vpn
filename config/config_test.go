@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"log"
@@ -11,7 +11,7 @@ var testConfig *Config
 
 func init() {
 	var err error
-	testConfig, err = loadConfiguration("fixtures/config_test.toml")
+	testConfig, err = LoadConfiguration("../fixtures/config_test.toml")
 	if err != nil {
 		log.Println(err)
 	}
@@ -43,7 +43,7 @@ func Test_Config_LoadConfiguration_Providers(t *testing.T) {
 }
 
 func Test_Config_LoadConfiguration_NoFile(t *testing.T) {
-	config, err := loadConfiguration("fixtures/does_not_exist.toml")
+	config, err := LoadConfiguration("../fixtures/does_not_exist.toml")
 	assert.Nil(t, config)
 	assert.NotNil(t, err)
 }

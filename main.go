@@ -106,14 +106,9 @@ func destroyVpn(c *cli.Context) {
 
 func showVpn(c *cli.Context) {
 	cfg := parseGlobalOptions(c)
-	p := getProvider(cfg)
+	keyId := getEasyVpnSshKeyId(cfg)
 
-	keys, err := p.GetInstalledSshKeys()
-	if err != nil {
-		log.Println("Could not retrieve list of installed SSH-Keys")
-		log.Fatal(err)
-	}
-	fmt.Printf("%v\n", keys) // TODO: remove!
+	fmt.Printf("KEY-ID: %v\n", keyId) // TODO: remove!
 }
 
 func parseGlobalOptions(c *cli.Context) *config.Config {

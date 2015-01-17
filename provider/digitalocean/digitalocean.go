@@ -59,6 +59,14 @@ func (d DO) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 	return data, nil
 }
 
+func (d DO) InstallNewSshKey(name, publicKey string) (string, error) {
+	return "", errors.New("Not yet implemented!")
+}
+
+func (d DO) UpdateSshKey(id, name, key string) error {
+	return errors.New("Not yet implemented!")
+}
+
 func (d *DO) GetConfig() *config.Config {
 	return d.Config
 }

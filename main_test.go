@@ -41,3 +41,5 @@ func Test_Main_ParseGlobalOptions(t *testing.T) {
 		assert.Equal(t, 777, config.Options.Uptime)
 	}
 }
+
+// TODO: add test for getProvider()

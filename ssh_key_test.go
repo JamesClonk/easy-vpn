@@ -38,6 +38,10 @@ func (m MockedProvider) UpdateSshKey(id, name, key string) (string, error) {
 	return id + ":" + name + ":" + key, nil
 }
 
+func (m MockedProvider) GetAllVMs() ([]provider.VM, error) {
+	return nil, nil
+}
+
 func Test_Main_GetEasyVpnSshKeyId(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	set.String("config", "fixtures/config_test.toml", "...")

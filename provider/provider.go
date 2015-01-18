@@ -8,10 +8,24 @@ type SshKey struct {
 	Key  string
 }
 
+type VM struct {
+	Id     string
+	Name   string
+	OS     string
+	IP     string
+	Region string
+	Status string
+}
+
 type API interface {
 	GetProviderName() string
 	GetConfig() *config.Config
+
+	// ssh-keys
 	GetInstalledSshKeys() ([]SshKey, error)
 	InstallNewSshKey(name, key string) (string, error)
 	UpdateSshKey(id, name, key string) (string, error)
+
+	// machines
+	GetAllVMs() ([]VM, error)
 }

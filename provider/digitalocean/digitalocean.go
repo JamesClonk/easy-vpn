@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -32,6 +33,10 @@ type DO struct {
 
 func (d DO) GetProviderName() string {
 	return "DigitalOcean"
+}
+
+func (d DO) GetConfig() *config.Config {
+	return d.Config
 }
 
 func (d DO) GetInstalledSshKeys() (data []provider.SshKey, err error) {
@@ -111,6 +116,11 @@ func (d DO) UpdateSshKey(id, name, key string) (string, error) {
 	return d.InstallNewSshKey(name, key)
 }
 
+func (d DO) GetAllVMs() ([]provider.VM, error) {
+	log.Fatal("Not yet implemented!")
+	return nil, nil
+}
+
 func (d DO) deleteSshKey(id string) error {
 	resp, err := d.doDelete(baseUrl + `/account/keys/` + id)
 	if err != nil {
@@ -128,10 +138,6 @@ func (d DO) deleteSshKey(id string) error {
 	}
 
 	return nil
-}
-
-func (d DO) GetConfig() *config.Config {
-	return d.Config
 }
 
 func (d *DO) doGet(url string) (*http.Response, error) {

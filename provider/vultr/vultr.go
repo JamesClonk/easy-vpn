@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -27,6 +28,10 @@ type Vultr struct {
 
 func (v Vultr) GetProviderName() string {
 	return "VULTR"
+}
+
+func (v Vultr) GetConfig() *config.Config {
+	return v.Config
 }
 
 func (v Vultr) GetInstalledSshKeys() (data []provider.SshKey, err error) {
@@ -126,8 +131,9 @@ func (v Vultr) UpdateSshKey(id, name, key string) (string, error) {
 	return id, nil
 }
 
-func (v Vultr) GetConfig() *config.Config {
-	return v.Config
+func (v Vultr) GetAllVMs() ([]provider.VM, error) {
+	log.Fatal("Not yet implemented!")
+	return nil, nil
 }
 
 func (v *Vultr) urlWithApiKey(url string) string {

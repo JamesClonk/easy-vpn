@@ -14,7 +14,7 @@ type Config struct {
 
 type Provider struct {
 	ApiKey string `toml:"api_key"`
-	Region int    `toml:"region"`
+	Region string `toml:"region"`
 }
 
 type Options struct {

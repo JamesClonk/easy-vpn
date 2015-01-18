@@ -4,11 +4,11 @@ ssh_public_key = "fixtures/vps_rsa.pub"
 
 [providers.digitalocean]
 api_key = "abcdefg123xyz"
-region = 3
+region = "nyc3"
 
 [providers.vultr]
 api_key = "xyzabcdefg999"
-region = 7
+region = "7"
 
 [options]
 max_idletime = 20 # minutes

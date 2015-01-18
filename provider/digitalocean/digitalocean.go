@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 
@@ -25,6 +24,40 @@ type SshKey struct {
 	Name        string `json:"name"`
 	Key         string `json:"public_key"`
 	Fingerprint string `json:"fingerprint"`
+}
+
+type Droplets struct {
+	Droplets []Droplet `json:"droplets"`
+}
+
+type Droplet struct {
+	Id     int      `json:"id"`
+	Name   string   `json:"name"`
+	Status string   `json:"status"`
+	Region Region   `json:"region"`
+	OS     Image    `json:"image"`
+	IP     Networks `json:"networks"`
+}
+
+type Region struct {
+	Slug string `json:"slug"`
+	Name string `json:"name"`
+}
+
+type Image struct {
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+	Distro string `json:"distribution"`
+	Slug   string `json:"slug"`
+}
+
+type Networks struct {
+	V4 []NetworkV4 `json:"v4"`
+}
+
+type NetworkV4 struct {
+	IP   string `json:"ip_address"`
+	Type string `json:"type"`
 }
 
 type DO struct {
@@ -116,9 +149,41 @@ func (d DO) UpdateSshKey(id, name, key string) (string, error) {
 	return d.InstallNewSshKey(name, key)
 }
 
-func (d DO) GetAllVMs() ([]provider.VM, error) {
-	log.Fatal("Not yet implemented!")
-	return nil, nil
+func (d DO) GetAllVMs() (data []provider.VM, err error) {
+	resp, err := d.doGet(baseUrl + `/droplets`)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(body))
+	}
+
+	var droplets Droplets
+	if err := json.Unmarshal(body, &droplets); err != nil {
+		return nil, err
+	}
+
+	// convert digitalocean droplets into array of provider api vm's
+	for _, droplet := range droplets.Droplets {
+		key := provider.VM{
+			Id:     fmt.Sprintf("%d", droplet.Id),
+			Name:   droplet.Name,
+			Status: droplet.Status,
+			OS:     droplet.OS.Slug,
+			IP:     droplet.IP.V4[0].IP,
+			Region: droplet.Region.Slug,
+		}
+		data = append(data, key)
+	}
+
+	return data, nil
 }
 
 func (d DO) deleteSshKey(id string) error {

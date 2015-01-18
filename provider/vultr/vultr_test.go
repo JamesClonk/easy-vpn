@@ -38,6 +38,14 @@ func Test_Provider_Vultr_GetProviderName(t *testing.T) {
 	}
 }
 
+func Test_Provider_Vultr_GetConfig(t *testing.T) {
+	v := Vultr{Config: testConfig}
+	cfg := v.GetConfig()
+	if assert.NotNil(t, cfg) {
+		assert.Equal(t, testConfig, cfg)
+	}
+}
+
 func Test_Provider_Vultr_GetInstalledSshKeys_Error(t *testing.T) {
 	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
 	defer server.Close()
@@ -166,13 +174,7 @@ func Test_Provider_Vultr_UpdateSshKey_KeyId(t *testing.T) {
 	}
 }
 
-func Test_Provider_Vultr_GetConfig(t *testing.T) {
-	v := Vultr{Config: testConfig}
-	cfg := v.GetConfig()
-	if assert.NotNil(t, cfg) {
-		assert.Equal(t, testConfig, cfg)
-	}
-}
+// TODO: add test for GetAllVMs()
 
 func Test_Provider_Vultr_UrlWithApiKey(t *testing.T) {
 	v := Vultr{Config: testConfig}

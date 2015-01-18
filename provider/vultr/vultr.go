@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -20,6 +19,15 @@ type SshKey struct {
 	Id   string `json:"SSHKEYID"`
 	Name string `json:"name"`
 	Key  string `json:"ssh_key"`
+}
+
+type Server struct {
+	Id     string `json:"SUBID"`
+	Name   string `json:"label"`
+	OS     string `json:"os"`
+	IP     string `json:"main_ip"`
+	Region string `json:"DCID"`
+	Status string `json:"status"`
 }
 
 type Vultr struct {
@@ -131,9 +139,46 @@ func (v Vultr) UpdateSshKey(id, name, key string) (string, error) {
 	return id, nil
 }
 
-func (v Vultr) GetAllVMs() ([]provider.VM, error) {
-	log.Fatal("Not yet implemented!")
-	return nil, nil
+func (v Vultr) GetAllVMs() (data []provider.VM, err error) {
+	resp, err := http.Get(v.urlWithApiKey(baseUrl + `/server/list`))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New(string(body))
+	}
+
+	// vultr returns empty array if no servers are found
+	if strings.Trim(string(body), "\t\r\n ") == "[]" {
+		return data, nil
+	}
+
+	var vultrServers map[string]Server
+	if err := json.Unmarshal(body, &vultrServers); err != nil {
+		return nil, err
+	}
+
+	// convert vultr servers into array of provider api vm's
+	for _, value := range vultrServers {
+		key := provider.VM{
+			Id:     value.Id,
+			Name:   value.Name,
+			OS:     value.OS,
+			IP:     value.IP,
+			Region: value.Region,
+			Status: value.Status,
+		}
+		data = append(data, key)
+	}
+
+	return data, nil
 }
 
 func (v *Vultr) urlWithApiKey(url string) string {

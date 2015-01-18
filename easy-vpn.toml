@@ -4,11 +4,11 @@ ssh_public_key = "~/.ssh/vps_rsa.pub"
 
 [providers.digitalocean]
 api_key = "abcdefg123xyz"
-region = 2
+region = "ams1"
 
 [providers.vultr]
 api_key = "abcdefg123xyz"
-region = 5
+region = "5"
 
 [options]
 max_idletime = 15 # minutes

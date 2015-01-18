@@ -102,9 +102,17 @@ func main() {
 func startVpn(c *cli.Context) {
 	cfg := parseGlobalOptions(c)
 	p := getProvider(cfg)
-	keyId := getEasyVpnSshKeyId(p)
 
-	fmt.Printf("KEY-ID: %v\n", keyId) // TODO: remove!
+	// first lets get all currently installed ssh-keys
+	machines, err := p.GetAllVMs()
+	if err != nil {
+		log.Println("Could not retrieve list of virtual machines")
+		log.Fatal(err)
+	}
+	fmt.Printf("%v\n", machines) // TODO: remove!
+
+	// keyId := getEasyVpnSshKeyId(p)
+	// fmt.Printf("KEY-ID: %v\n", keyId) // TODO: remove!
 }
 
 func destroyVpn(c *cli.Context) {

@@ -38,6 +38,14 @@ func Test_Provider_Digitalocean_GetProviderName(t *testing.T) {
 	}
 }
 
+func Test_Provider_Digitalocean_GetConfig(t *testing.T) {
+	d := DO{Config: testConfig}
+	cfg := d.GetConfig()
+	if assert.NotNil(t, cfg) {
+		assert.Equal(t, testConfig, cfg)
+	}
+}
+
 func Test_Provider_Digitalocean_GetInstalledSshKeys_Error(t *testing.T) {
 	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
 	defer server.Close()
@@ -165,10 +173,4 @@ func Test_Provider_Digitalocean_DeleteSshKey_Deleted(t *testing.T) {
 	}
 }
 
-func Test_Provider_Digitalocean_GetConfig(t *testing.T) {
-	d := DO{Config: testConfig}
-	cfg := d.GetConfig()
-	if assert.NotNil(t, cfg) {
-		assert.Equal(t, testConfig, cfg)
-	}
-}
+// TODO: add test for GetAllVMs()

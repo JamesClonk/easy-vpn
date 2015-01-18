@@ -36,9 +36,9 @@ func Test_Config_LoadConfiguration_Options(t *testing.T) {
 func Test_Config_LoadConfiguration_Providers(t *testing.T) {
 	if assert.NotNil(t, testConfig) {
 		assert.Equal(t, "abcdefg123xyz", testConfig.Providers["digitalocean"].ApiKey)
-		assert.Equal(t, 3, testConfig.Providers["digitalocean"].Region)
+		assert.Equal(t, "nyc3", testConfig.Providers["digitalocean"].Region)
 		assert.Equal(t, "xyzabcdefg999", testConfig.Providers["vultr"].ApiKey)
-		assert.Equal(t, 7, testConfig.Providers["vultr"].Region)
+		assert.Equal(t, "7", testConfig.Providers["vultr"].Region)
 	}
 }
 

@@ -45,20 +45,23 @@ func Test_Main_ParseGlobalOptions(t *testing.T) {
 func Test_Main_GetProvider(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	set.String("config", "fixtures/config_test.toml", "...")
-	c := cli.NewContext(nil, nil, set)
+	c1 := cli.NewContext(nil, nil, set)
 
-	cfg := parseGlobalOptions(c)
+	cfg := parseGlobalOptions(c1)
 	if assert.NotNil(t, cfg) {
 		assert.Equal(t, "vultr", cfg.Provider)
 	}
 
-	p1 := getProvider(cfg)
+	p1 := getProvider(c1)
 	if assert.NotNil(t, p1) {
 		assert.Equal(t, "VULTR", p1.GetProviderName())
 	}
 
-	cfg.Provider = "digitalocean"
-	p2 := getProvider(cfg)
+	set.String("provider", "", "")
+	assert.Nil(t, set.Parse([]string{"--provider", "digitalocean"}))
+	c2 := cli.NewContext(nil, nil, set)
+
+	p2 := getProvider(c2)
 	if assert.NotNil(t, p2) {
 		assert.Equal(t, "DigitalOcean", p2.GetProviderName())
 	}

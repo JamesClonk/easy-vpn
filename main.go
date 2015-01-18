@@ -100,27 +100,19 @@ func main() {
 }
 
 func startVpn(c *cli.Context) {
-	cfg := parseGlobalOptions(c)
-	p := getProvider(cfg)
-
-	// first lets get all currently installed ssh-keys
-	machines, err := p.GetAllVMs()
-	if err != nil {
-		log.Println("Could not retrieve list of virtual machines")
-		log.Fatal(err)
-	}
-	fmt.Printf("%v\n", machines) // TODO: remove!
-
-	// keyId := getEasyVpnSshKeyId(p)
-	// fmt.Printf("KEY-ID: %v\n", keyId) // TODO: remove!
+	// p := getProvider(c)
+	// machines := getAllVMs(p)
 }
 
 func destroyVpn(c *cli.Context) {
-	//config := parseGlobalOptions(c)
+	//...
 }
 
 func showVpn(c *cli.Context) {
-	//config := parseGlobalOptions(c)
+	p := getProvider(c)
+	for _, vm := range getAllVMs(p) {
+		fmt.Printf("%q\n", vm)
+	}
 }
 
 func parseGlobalOptions(c *cli.Context) *config.Config {
@@ -163,7 +155,9 @@ func parseGlobalOptions(c *cli.Context) *config.Config {
 	return cfg
 }
 
-func getProvider(cfg *config.Config) provider.API {
+func getProvider(c *cli.Context) provider.API {
+	cfg := parseGlobalOptions(c)
+
 	switch cfg.Provider {
 	case "digitalocean":
 		return digitalocean.DO{Config: cfg}

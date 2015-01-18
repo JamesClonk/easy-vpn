@@ -129,6 +129,8 @@ func parseGlobalOptions(c *cli.Context) *config.Config {
 		cfg.Providers[cfg.Provider] = config.Provider{
 			ApiKey: c.GlobalString("api-key"),
 			Region: cfg.Providers[cfg.Provider].Region,
+			Size:   cfg.Providers[cfg.Provider].Size,
+			OS:     cfg.Providers[cfg.Provider].OS,
 		}
 	}
 

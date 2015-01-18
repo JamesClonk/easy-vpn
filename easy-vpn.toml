@@ -4,11 +4,15 @@ ssh_public_key = "~/.ssh/vps_rsa.pub"
 
 [providers.digitalocean]
 api_key = "abcdefg123xyz"
-region = "ams1"
+region = "nyc1"
+size = "512m"
+os = "ubuntu-14-04-x64" # slug for Ubuntu 14.04 x64
 
 [providers.vultr]
 api_key = "abcdefg123xyz"
-region = "5"
+region = "1" # 1 = New Jersey
+size = "1" # 1 = 512mb
+os = "160" # 160 = Ubuntu 14.04 x64
 
 [options]
 max_idletime = 15 # minutes

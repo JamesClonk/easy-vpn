@@ -28,4 +28,5 @@ type API interface {
 
 	// machines
 	GetAllVMs() ([]VM, error)
+	CreateVM(name, os, size, region string) (string, error)
 }

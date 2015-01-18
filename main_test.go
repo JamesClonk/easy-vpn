@@ -43,6 +43,10 @@ func (m MockProvider) GetAllVMs() ([]provider.VM, error) {
 	return m.VMs, nil
 }
 
+func (m MockProvider) CreateVM(name, os, size, region string) (string, error) {
+	return name + ":" + os + ":" + size + ":" + region, nil
+}
+
 func TestMain(m *testing.M) {
 	// there can only be 1 TestMain for the whole package main.
 	// setup/teardown everything here thats needed for all tests.
@@ -58,7 +62,8 @@ func Test_Main_ParseGlobalOptions(t *testing.T) {
 	set.String("idletime", "", "")
 	set.String("uptime", "", "")
 
-	assert.Nil(t, set.Parse([]string{"--provider", "AWS"}))
+	assert.Nil(t, set.Parse([]string{"--config", "fixtures/config_test.toml"}))
+	assert.Nil(t, set.Parse([]string{"--provider", "aws"}))
 	assert.Nil(t, set.Parse([]string{"--api-key", "abcdef1234567890"}))
 	assert.Nil(t, set.Parse([]string{"--autoconnect", "TRUE"}))
 	assert.Nil(t, set.Parse([]string{"--idletime", "123"}))
@@ -68,8 +73,11 @@ func Test_Main_ParseGlobalOptions(t *testing.T) {
 
 	cfg := parseGlobalOptions(c)
 	if assert.NotNil(t, cfg) {
-		assert.Equal(t, "AWS", cfg.Provider)
+		assert.Equal(t, "aws", cfg.Provider)
 		assert.Equal(t, "abcdef1234567890", cfg.Providers[cfg.Provider].ApiKey)
+		assert.Equal(t, "9", cfg.Providers[cfg.Provider].Region)
+		assert.Equal(t, "7", cfg.Providers[cfg.Provider].Size)
+		assert.Equal(t, "999", cfg.Providers[cfg.Provider].OS)
 		assert.Equal(t, true, cfg.Options.Autoconnect)
 		assert.Equal(t, 123, cfg.Options.Idletime)
 		assert.Equal(t, 777, cfg.Options.Uptime)

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 
@@ -184,6 +185,11 @@ func (d DO) GetAllVMs() (data []provider.VM, err error) {
 	}
 
 	return data, nil
+}
+
+func (d DO) CreateVM(name, os, size, region string) (string, error) {
+	log.Fatal("Not yet implemented!")
+	return "", nil
 }
 
 func (d DO) deleteSshKey(id string) error {

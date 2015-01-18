@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -179,6 +180,11 @@ func (v Vultr) GetAllVMs() (data []provider.VM, err error) {
 	}
 
 	return data, nil
+}
+
+func (v Vultr) CreateVM(name, os, size, region string) (string, error) {
+	log.Fatal("Not yet implemented!")
+	return "", nil
 }
 
 func (v *Vultr) urlWithApiKey(url string) string {

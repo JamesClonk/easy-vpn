@@ -5,42 +5,10 @@ import (
 	"os/user"
 	"testing"
 
-	"github.com/JamesClonk/easy-vpn/config"
 	"github.com/JamesClonk/easy-vpn/provider"
 	"github.com/codegangsta/cli"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 )
-
-type MockedProvider struct {
-	Config *config.Config
-	Keys   []provider.SshKey
-	mock.Mock
-}
-
-func (m MockedProvider) GetProviderName() string {
-	return "mock"
-}
-
-func (m MockedProvider) GetConfig() *config.Config {
-	return m.Config
-}
-
-func (m MockedProvider) GetInstalledSshKeys() ([]provider.SshKey, error) {
-	return m.Keys, nil
-}
-
-func (m MockedProvider) InstallNewSshKey(name, key string) (string, error) {
-	return name + ":" + key, nil
-}
-
-func (m MockedProvider) UpdateSshKey(id, name, key string) (string, error) {
-	return id + ":" + name + ":" + key, nil
-}
-
-func (m MockedProvider) GetAllVMs() ([]provider.VM, error) {
-	return nil, nil
-}
 
 func Test_Main_GetEasyVpnSshKeyId(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
@@ -48,7 +16,7 @@ func Test_Main_GetEasyVpnSshKeyId(t *testing.T) {
 	c := cli.NewContext(nil, nil, set)
 
 	cfg := parseGlobalOptions(c)
-	mockedProvider1 := MockedProvider{
+	mockedProvider1 := MockProvider{
 		Config: cfg,
 		Keys: []provider.SshKey{
 			provider.SshKey{},
@@ -67,7 +35,7 @@ func Test_Main_GetEasyVpnSshKeyId(t *testing.T) {
 		assert.Equal(t, "mockId:easy-vpn:this would be a public key!\n;)\n", keyId1)
 	}
 
-	mockedProvider2 := MockedProvider{Config: cfg}
+	mockedProvider2 := MockProvider{Config: cfg}
 	keyId2 := getEasyVpnSshKeyId(mockedProvider2)
 	if assert.NotNil(t, keyId2) {
 		assert.Equal(t, "easy-vpn:this would be a public key!\n;)\n", keyId2)

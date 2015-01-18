@@ -109,7 +109,8 @@ func startVpn(c *cli.Context) {
 }
 
 func destroyVpn(c *cli.Context) {
-	//...
+	p := getProvider(c)
+	destroyEasyVpnVM(p)
 }
 
 func showVpn(c *cli.Context) {

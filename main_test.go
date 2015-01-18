@@ -52,6 +52,10 @@ func (m MockProvider) StartVM(id string) error {
 	return nil
 }
 
+func (m MockProvider) DestroyVM(id string) error {
+	return nil
+}
+
 func (m MockProvider) Sleep() {
 	time.Sleep(5 * time.Millisecond)
 }

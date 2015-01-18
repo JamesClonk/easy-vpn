@@ -198,6 +198,11 @@ func (d DO) StartVM(id string) error {
 	return nil
 }
 
+func (d DO) DestroyVM(id string) error {
+	log.Fatal("Not yet implemented!")
+	return nil
+}
+
 func (d DO) Sleep() {
 	time.Sleep(time.Duration(d.GetConfig().Sleep) * time.Millisecond)
 }

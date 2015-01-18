@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/JamesClonk/easy-vpn/provider"
@@ -52,6 +55,46 @@ func getEasyVpnVM(p provider.API, sshkeyId string) (vm provider.VM) {
 	fmt.Println()
 
 	return
+}
+
+func destroyEasyVpnVM(p provider.API) {
+	var vm provider.VM
+
+	// check to see if easy-vpn vm actually exists
+	vmExists := false
+	for _, machine := range getAllVMs(p) {
+		if machine.Name == EASYVPN_IDENTIFIER {
+			vm = machine
+			vmExists = true
+			break
+		}
+	}
+
+	// ask to destroy it if it exists
+	if vmExists {
+		fmt.Println("Do you really want to destroy the following virtual machine?")
+		fmt.Printf("%q\n", vm)
+		fmt.Printf(`Confirm with "YES": `)
+
+		reader := bufio.NewReader(os.Stdin)
+		answer, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
+		answer = strings.Trim(answer, "\t\n\r ")
+
+		if answer == "YES" {
+			fmt.Println("Destroy virtual machine")
+			err := p.DestroyVM(vm.Id)
+			if err != nil {
+				log.Println("Could not destroy virtual machine")
+				log.Fatal(err)
+			}
+		}
+	} else {
+		fmt.Println("Virtual machine did not exist")
+	}
+
 }
 
 func waitForNewVM(p provider.API, vm *provider.VM) {

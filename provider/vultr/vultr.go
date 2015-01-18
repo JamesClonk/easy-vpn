@@ -247,6 +247,29 @@ func (v Vultr) StartVM(id string) error {
 	return nil
 }
 
+func (v Vultr) DestroyVM(id string) error {
+	resp, err := http.PostForm(v.urlWithApiKey(baseUrl+`/server/destroy`),
+		url.Values{
+			"SUBID": {id},
+		})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(string(body))
+	}
+
+	v.Sleep() // respect request rate limitation
+	return nil
+}
+
 func (v Vultr) Sleep() {
 	time.Sleep(time.Duration(v.GetConfig().Sleep) * time.Millisecond)
 }

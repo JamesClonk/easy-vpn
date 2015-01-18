@@ -30,6 +30,7 @@ type API interface {
 	GetAllVMs() ([]VM, error)
 	CreateVM(name, os, size, region, sshkey string) (string, error)
 	StartVM(id string) error
+	DestroyVM(id string) error
 
 	// for request rate limiting
 	Sleep()

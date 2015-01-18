@@ -1,6 +1,7 @@
 provider = "digitalocean"
 ssh_private_key = "~/.ssh/vps_rsa"
 ssh_public_key = "~/.ssh/vps_rsa.pub"
+sleeptime = 1500 # how many milliseconds to wait between API calls (because of request rate limitations)
 
 [providers.digitalocean]
 api_key = "abcdefg123xyz"
@@ -11,7 +12,7 @@ os = "ubuntu-14-04-x64" # slug for Ubuntu 14.04 x64
 [providers.vultr]
 api_key = "abcdefg123xyz"
 region = "1" # 1 = New Jersey
-size = "1" # 1 = 512mb
+size = "11" # 11 = 512 MB RAM,160 GB SATA,1.00 TB BW
 os = "160" # 160 = Ubuntu 14.04 x64
 
 [options]

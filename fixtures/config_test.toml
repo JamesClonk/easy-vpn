@@ -1,6 +1,7 @@
 provider = "vultr"
 ssh_private_key = "fixtures/vps_rsa"
 ssh_public_key = "fixtures/vps_rsa.pub"
+sleeptime = 5
 
 [providers.aws]
 api_key = "xyz1234567890"

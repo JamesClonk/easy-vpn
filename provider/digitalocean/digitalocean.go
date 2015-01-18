@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/JamesClonk/easy-vpn/config"
 	"github.com/JamesClonk/easy-vpn/provider"
@@ -66,7 +67,7 @@ type DO struct {
 }
 
 func (d DO) GetProviderName() string {
-	return "DigitalOcean"
+	return "digitalocean"
 }
 
 func (d DO) GetConfig() *config.Config {
@@ -187,9 +188,18 @@ func (d DO) GetAllVMs() (data []provider.VM, err error) {
 	return data, nil
 }
 
-func (d DO) CreateVM(name, os, size, region string) (string, error) {
+func (d DO) CreateVM(name, os, size, region, sshkey string) (string, error) {
 	log.Fatal("Not yet implemented!")
 	return "", nil
+}
+
+func (d DO) StartVM(id string) error {
+	log.Fatal("Not yet implemented!")
+	return nil
+}
+
+func (d DO) Sleep() {
+	time.Sleep(time.Duration(d.GetConfig().Sleep) * time.Millisecond)
 }
 
 func (d DO) deleteSshKey(id string) error {
@@ -221,6 +231,7 @@ func (d *DO) doGet(url string) (*http.Response, error) {
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", cfg.Providers[cfg.Provider].ApiKey))
 
+	d.Sleep() // respect request rate limitation
 	return client.Do(req)
 }
 
@@ -235,6 +246,7 @@ func (d *DO) doPost(url, data string) (*http.Response, error) {
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", cfg.Providers[cfg.Provider].ApiKey))
 	req.Header.Set("Content-Type", "application/json")
 
+	d.Sleep() // respect request rate limitation
 	return client.Do(req)
 }
 
@@ -248,5 +260,6 @@ func (d *DO) doDelete(url string) (*http.Response, error) {
 	}
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %v", cfg.Providers[cfg.Provider].ApiKey))
 
+	d.Sleep() // respect request rate limitation
 	return client.Do(req)
 }

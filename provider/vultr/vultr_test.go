@@ -34,7 +34,7 @@ func getTestServer(code int, body string) *httptest.Server {
 func Test_Provider_Vultr_GetProviderName(t *testing.T) {
 	v := Vultr{Config: testConfig}
 	if assert.NotNil(t, v) {
-		assert.Equal(t, "VULTR", v.GetProviderName())
+		assert.Equal(t, "vultr", v.GetProviderName())
 	}
 }
 

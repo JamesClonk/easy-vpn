@@ -100,8 +100,12 @@ func main() {
 }
 
 func startVpn(c *cli.Context) {
-	// p := getProvider(c)
-	// machines := getAllVMs(p)
+	p := getProvider(c)
+
+	sshkeyId := getEasyVpnSshKeyId(p)
+	vm := getEasyVpnVM(p, sshkeyId)
+
+	fmt.Printf("%q\n", vm)
 }
 
 func destroyVpn(c *cli.Context) {

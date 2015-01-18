@@ -34,7 +34,7 @@ func getTestServer(code int, body string) *httptest.Server {
 func Test_Provider_Digitalocean_GetProviderName(t *testing.T) {
 	d := DO{Config: testConfig}
 	if assert.NotNil(t, d) {
-		assert.Equal(t, "DigitalOcean", d.GetProviderName())
+		assert.Equal(t, "digitalocean", d.GetProviderName())
 	}
 }
 

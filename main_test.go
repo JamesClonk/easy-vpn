@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/JamesClonk/easy-vpn/config"
 	"github.com/JamesClonk/easy-vpn/provider"
@@ -43,8 +44,16 @@ func (m MockProvider) GetAllVMs() ([]provider.VM, error) {
 	return m.VMs, nil
 }
 
-func (m MockProvider) CreateVM(name, os, size, region string) (string, error) {
-	return name + ":" + os + ":" + size + ":" + region, nil
+func (m MockProvider) CreateVM(name, os, size, region, sshkey string) (string, error) {
+	return name + ":" + os + ":" + size + ":" + region + ":" + sshkey, nil
+}
+
+func (m MockProvider) StartVM(id string) error {
+	return nil
+}
+
+func (m MockProvider) Sleep() {
+	time.Sleep(5 * time.Millisecond)
 }
 
 func TestMain(m *testing.M) {
@@ -96,7 +105,7 @@ func Test_Main_GetProvider(t *testing.T) {
 
 	p1 := getProvider(c1)
 	if assert.NotNil(t, p1) {
-		assert.Equal(t, "VULTR", p1.GetProviderName())
+		assert.Equal(t, "vultr", p1.GetProviderName())
 	}
 
 	set.String("provider", "", "")
@@ -105,6 +114,6 @@ func Test_Main_GetProvider(t *testing.T) {
 
 	p2 := getProvider(c2)
 	if assert.NotNil(t, p2) {
-		assert.Equal(t, "DigitalOcean", p2.GetProviderName())
+		assert.Equal(t, "digitalocean", p2.GetProviderName())
 	}
 }

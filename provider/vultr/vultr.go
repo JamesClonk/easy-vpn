@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"github.com/JamesClonk/easy-vpn/config"
 	"github.com/JamesClonk/easy-vpn/provider"
@@ -36,7 +36,7 @@ type Vultr struct {
 }
 
 func (v Vultr) GetProviderName() string {
-	return "VULTR"
+	return "vultr"
 }
 
 func (v Vultr) GetConfig() *config.Config {
@@ -79,6 +79,7 @@ func (v Vultr) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 		data = append(data, key)
 	}
 
+	v.Sleep() // respect request rate limitation
 	return data, nil
 }
 
@@ -113,6 +114,7 @@ func (v Vultr) InstallNewSshKey(name, key string) (string, error) {
 		return "", err
 	}
 
+	v.Sleep() // respect request rate limitation
 	return result.Id, nil
 }
 
@@ -137,6 +139,7 @@ func (v Vultr) UpdateSshKey(id, name, key string) (string, error) {
 		return "", errors.New(string(body))
 	}
 
+	v.Sleep() // respect request rate limitation
 	return id, nil
 }
 
@@ -179,12 +182,73 @@ func (v Vultr) GetAllVMs() (data []provider.VM, err error) {
 		data = append(data, key)
 	}
 
+	v.Sleep() // respect request rate limitation
 	return data, nil
 }
 
-func (v Vultr) CreateVM(name, os, size, region string) (string, error) {
-	log.Fatal("Not yet implemented!")
-	return "", nil
+func (v Vultr) CreateVM(name, os, size, region, sshkey string) (string, error) {
+	resp, err := http.PostForm(v.urlWithApiKey(baseUrl+`/server/create`),
+		url.Values{
+			"label":     {name},
+			"OSID":      {os},
+			"VPSPLANID": {size},
+			"DCID":      {region},
+			"SSHKEYID":  {sshkey},
+		})
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New(string(body))
+	}
+
+	if !strings.Contains(string(body), `"SUBID":`) {
+		return "", errors.New(string(body))
+	}
+
+	result := struct {
+		Id string `json:"SUBID"`
+	}{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", err
+	}
+
+	v.Sleep() // respect request rate limitation
+	return result.Id, nil
+}
+
+func (v Vultr) StartVM(id string) error {
+	resp, err := http.PostForm(v.urlWithApiKey(baseUrl+`/server/start`),
+		url.Values{
+			"SUBID": {id},
+		})
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New(string(body))
+	}
+
+	v.Sleep() // respect request rate limitation
+	return nil
+}
+
+func (v Vultr) Sleep() {
+	time.Sleep(time.Duration(v.GetConfig().Sleep) * time.Millisecond)
 }
 
 func (v *Vultr) urlWithApiKey(url string) string {

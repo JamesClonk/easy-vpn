@@ -8,6 +8,7 @@ type Config struct {
 	Provider       string              `toml:"provider"`
 	PrivateKeyFile string              `toml:"ssh_private_key"`
 	PublicKeyFile  string              `toml:"ssh_public_key"`
+	Sleep          int                 `toml:"sleeptime"`
 	Providers      map[string]Provider `toml:"providers"`
 	Options        Options             `toml:"options"`
 }

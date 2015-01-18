@@ -46,7 +46,7 @@ func (v Vultr) GetInstalledSshKeys() (data []provider.SshKey, err error) {
 	}
 
 	// vultr returns empty array if no SSH Keys are found
-	if string(body) == "[]" {
+	if strings.Trim(string(body), "\t\r\n ") == "[]" {
 		return data, nil
 	}
 

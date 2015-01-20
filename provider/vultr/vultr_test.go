@@ -99,7 +99,7 @@ func Test_Provider_Vultr_GetInstalledSshKeys_Keys(t *testing.T) {
 			case "3":
 				assert.Equal(t, "cccc", key.Key)
 			default:
-				t.Fail()
+				t.Error("Unknown Key Id")
 			}
 		}
 	}
@@ -231,7 +231,7 @@ func Test_Provider_Vultr_GetAllVMs_VMs(t *testing.T) {
 				assert.Equal(t, "charlie", vm.Name)
 				assert.Equal(t, "centos", vm.OS)
 			default:
-				t.Fail()
+				t.Error("Unknown VM Id")
 			}
 		}
 	}

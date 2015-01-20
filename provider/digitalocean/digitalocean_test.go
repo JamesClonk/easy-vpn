@@ -310,7 +310,7 @@ func Test_Provider_Digitalocean_CreateVM_Error(t *testing.T) {
 }
 
 func Test_Provider_Digitalocean_CreateVM_NoVMId(t *testing.T) {
-	server := getTestServer(http.StatusOK, `{error-message}`)
+	server := getTestServer(http.StatusAccepted, `{error-message}`)
 	defer server.Close()
 
 	d := DO{Config: testConfig}
@@ -323,7 +323,7 @@ func Test_Provider_Digitalocean_CreateVM_NoVMId(t *testing.T) {
 }
 
 func Test_Provider_Digitalocean_CreateVM_VMId(t *testing.T) {
-	server := getTestServer(http.StatusOK, `{"droplet":{"id":3333,"name":"example.com","status":"new"}}`)
+	server := getTestServer(http.StatusAccepted, `{"droplet":{"id":3333,"name":"example.com","status":"new"}}`)
 	defer server.Close()
 
 	d := DO{Config: testConfig}
@@ -349,8 +349,32 @@ func Test_Provider_Digitalocean_StartVM_Error(t *testing.T) {
 	}
 }
 
+func Test_Provider_Digitalocean_StartVM_StatusMissing(t *testing.T) {
+	server := getTestServer(http.StatusCreated, `{"action":{"id":123,"???":"???"}}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	err := d.StartVM("1111")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{"action":{"id":123,"???":"???"}}`, err.Error())
+	}
+}
+
+func Test_Provider_Digitalocean_StartVM_StatusErrored(t *testing.T) {
+	server := getTestServer(http.StatusCreated, `{"action":{"id":123,"status":"errored"}}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	err := d.StartVM("1111")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{"action":{"id":123,"status":"errored"}}`, err.Error())
+	}
+}
+
 func Test_Provider_Digitalocean_StartVM_VMId(t *testing.T) {
-	server := getTestServer(http.StatusOK, `{"action":{"id":36804758,"status":"in-progress","type":"power_on"}}`)
+	server := getTestServer(http.StatusCreated, `{"action":{"id":456,"status":"in-progress","type":"power_on"}}`)
 	defer server.Close()
 
 	d := DO{Config: testConfig}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -189,17 +188,89 @@ func (d DO) GetAllVMs() (data []provider.VM, err error) {
 }
 
 func (d DO) CreateVM(name, os, size, region, sshkey string) (string, error) {
-	log.Fatal("Not yet implemented!")
-	return "", nil
+	values := fmt.Sprintf(`{
+			"name": "%v",
+			"region": "%v",
+			"size": "%v",
+			"image": "%v",
+			"ssh_keys": ["%v"],
+			"backups": false,
+			"ipv6": false,
+			"user_data": null,
+			"private_networking": null
+		}`, name, region, size, os, sshkey)
+	resp, err := d.doPost(baseUrl+`/droplets`, values)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusAccepted {
+		return "", errors.New(string(body))
+	}
+
+	if !strings.Contains(string(body), `"droplet":`) {
+		return "", errors.New(string(body))
+	}
+
+	result := struct {
+		Droplet Droplet `json:"droplet"`
+	}{}
+	if err := json.Unmarshal(body, &result); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%d", result.Droplet.Id), nil
 }
 
 func (d DO) StartVM(id string) error {
-	log.Fatal("Not yet implemented!")
+	resp, err := d.doPost(baseUrl+`/droplets/`+id+`/actions`, `{"type":"power_on"}`)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return errors.New(string(body))
+	}
+
+	if !strings.Contains(string(body), `"status":`) {
+		return errors.New(string(body))
+	}
+
+	if strings.Contains(string(body), `"errored"`) {
+		return errors.New(string(body))
+	}
+
 	return nil
 }
 
 func (d DO) DestroyVM(id string) error {
-	log.Fatal("Not yet implemented!")
+	resp, err := d.doDelete(baseUrl + `/droplets/` + id)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusNoContent {
+		return errors.New(string(body))
+	}
+
 	return nil
 }
 

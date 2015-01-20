@@ -5,8 +5,8 @@ sleeptime = 1500 # how many milliseconds to wait between API calls (because of r
 
 [providers.digitalocean]
 api_key = "abcdefg123xyz"
-region = "nyc1"
-size = "512m"
+region = "nyc3"
+size = "512mb"
 os = "ubuntu-14-04-x64" # slug for Ubuntu 14.04 x64
 
 [providers.vultr]

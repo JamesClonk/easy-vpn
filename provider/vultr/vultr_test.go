@@ -174,7 +174,157 @@ func Test_Provider_Vultr_UpdateSshKey_KeyId(t *testing.T) {
 	}
 }
 
-// TODO: add test for GetAllVMs()
+func Test_Provider_Vultr_GetAllVMs_Error(t *testing.T) {
+	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	machines, err := v.GetAllVMs()
+	assert.Nil(t, machines)
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Vultr_GetAllVMs_NoVMs(t *testing.T) {
+	server := getTestServer(http.StatusOK, `[]`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	machines, err := v.GetAllVMs()
+	if err != nil {
+		t.Error(err)
+	}
+	assert.Nil(t, machines)
+}
+
+func Test_Provider_Vultr_GetAllVMs_VMs(t *testing.T) {
+	server := getTestServer(http.StatusOK,
+		`{
+			"1":{"SUBID":"1","label":"alpha","OS":"ubuntu","main_ip":"123.456.789.0"},
+			"2":{"SUBID":"2","label":"beta","OS":"ubuntu","DCID":"Earth","status":"active"},
+			"3":{"SUBID":"3","label":"charlie","OS":"centos"}
+		}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	machines, err := v.GetAllVMs()
+	if err != nil {
+		t.Error(err)
+	}
+	if assert.NotNil(t, machines) {
+		assert.Equal(t, 3, len(machines))
+		// machines can be in random order
+		for _, vm := range machines {
+			switch vm.Id {
+			case "1":
+				assert.Equal(t, "alpha", vm.Name)
+				assert.Equal(t, "ubuntu", vm.OS)
+				assert.Equal(t, "123.456.789.0", vm.IP)
+			case "2":
+				assert.Equal(t, "Earth", vm.Region)
+				assert.Equal(t, "active", vm.Status)
+			case "3":
+				assert.Equal(t, "charlie", vm.Name)
+				assert.Equal(t, "centos", vm.OS)
+			default:
+				t.Fail()
+			}
+		}
+	}
+}
+
+func Test_Provider_Vultr_CreateVM_Error(t *testing.T) {
+	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	vmId, err := v.CreateVM("test-vm", "test-os", "test-size", "test-region", "test-key-id")
+	assert.Equal(t, "", vmId)
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Vultr_CreateVM_NoVMId(t *testing.T) {
+	server := getTestServer(http.StatusOK, `{error-message}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	vmId, err := v.CreateVM("test-vm", "test-os", "test-size", "test-region", "test-key-id")
+	assert.Equal(t, "", vmId)
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Vultr_CreateVM_VMId(t *testing.T) {
+	server := getTestServer(http.StatusOK, `{"SUBID":"test-vm"}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	vmId, err := v.CreateVM("test-vm", "test-os", "test-size", "test-region", "test-key-id")
+	if err != nil {
+		t.Error(err)
+	}
+	if assert.NotNil(t, vmId) {
+		assert.Equal(t, "test-vm", vmId)
+	}
+}
+
+func Test_Provider_Vultr_StartVM_Error(t *testing.T) {
+	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	err := v.StartVM("alpha")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Vultr_StartVM_VMId(t *testing.T) {
+	server := getTestServer(http.StatusOK, `{no-response?!}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	err := v.StartVM("alpha")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func Test_Provider_Vultr_DestroyVM_Error(t *testing.T) {
+	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	err := v.DestroyVM("alpha")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Vultr_DestroyVM_VMId(t *testing.T) {
+	server := getTestServer(http.StatusOK, `{no-response?!}`)
+	defer server.Close()
+
+	v := Vultr{Config: testConfig}
+
+	err := v.DestroyVM("alpha")
+	if err != nil {
+		t.Error(err)
+	}
+}
 
 func Test_Provider_Vultr_UrlWithApiKey(t *testing.T) {
 	v := Vultr{Config: testConfig}

@@ -295,3 +295,92 @@ func Test_Provider_Digitalocean_GetAllVMs_VMs(t *testing.T) {
 		}
 	}
 }
+
+func Test_Provider_Digitalocean_CreateVM_Error(t *testing.T) {
+	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	vmId, err := d.CreateVM("test-vm", "test-os", "test-size", "test-region", "test-key-id")
+	assert.Equal(t, "", vmId)
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Digitalocean_CreateVM_NoVMId(t *testing.T) {
+	server := getTestServer(http.StatusOK, `{error-message}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	vmId, err := d.CreateVM("test-vm", "test-os", "test-size", "test-region", "test-key-id")
+	assert.Equal(t, "", vmId)
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Digitalocean_CreateVM_VMId(t *testing.T) {
+	server := getTestServer(http.StatusOK, `{"droplet":{"id":3333,"name":"example.com","status":"new"}}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	vmId, err := d.CreateVM("test-vm", "test-os", "test-size", "test-region", "test-key-id")
+	if err != nil {
+		t.Error(err)
+	}
+	if assert.NotNil(t, vmId) {
+		assert.Equal(t, "3333", vmId)
+	}
+}
+
+func Test_Provider_Digitalocean_StartVM_Error(t *testing.T) {
+	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	err := d.StartVM("1111")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Digitalocean_StartVM_VMId(t *testing.T) {
+	server := getTestServer(http.StatusOK, `{"action":{"id":36804758,"status":"in-progress","type":"power_on"}}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	err := d.StartVM("1111")
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func Test_Provider_Digitalocean_DestroyVM_Error(t *testing.T) {
+	server := getTestServer(http.StatusNotAcceptable, `{error-message}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	err := d.DestroyVM("1111")
+	if assert.NotNil(t, err) {
+		assert.Equal(t, `{error-message}`, err.Error())
+	}
+}
+
+func Test_Provider_Digitalocean_DestroyVM_VMId(t *testing.T) {
+	server := getTestServer(http.StatusNoContent, `{no-response?!}`)
+	defer server.Close()
+
+	d := DO{Config: testConfig}
+
+	err := d.DestroyVM("1111")
+	if err != nil {
+		t.Error(err)
+	}
+}

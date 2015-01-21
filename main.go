@@ -109,9 +109,11 @@ func startVpn(c *cli.Context) {
 
 	// update machine
 	sshExecCmd(p, vm.IP, `apt-get update -qq`)
-	sshExecCmd(p, vm.IP, `apt-get install -qy docker pptpd iptables`)
+	sshExecCmd(p, vm.IP, `apt-get install -qy docker.io pptpd iptables`)
+	sshExecCmd(p, vm.IP, `service pptpd stop`)
 
 	// setup docker
+	sshExecCmd(p, vm.IP, `service docker.io restart`)
 	sshExecCmd(p, vm.IP, `docker pull jamesclonk/docker-pptpd`)
 	sshExecCmd(p, vm.IP, `echo "easy-vpn * secret-password *" >> /chap-secrets`)
 

@@ -105,7 +105,10 @@ func startVpn(c *cli.Context) {
 	sshkeyId := getEasyVpnSshKeyId(p)
 	vm := getEasyVpnVM(p, sshkeyId)
 
-	fmt.Printf("%q\n", vm)
+	fmt.Printf("%q\n", vm) // TODO: prettify
+
+	sshExecCmd(p, vm.IP, `apt-get update -qq`)
+	sshExecCmd(p, vm.IP, `apt-get install -qy docker pptpd iptables`)
 }
 
 func destroyVpn(c *cli.Context) {
@@ -116,7 +119,7 @@ func destroyVpn(c *cli.Context) {
 func showVpn(c *cli.Context) {
 	p := getProvider(c)
 	for _, vm := range getAllVMs(p) {
-		fmt.Printf("%q\n", vm)
+		fmt.Printf("%q\n", vm) // TODO: prettify
 	}
 }
 

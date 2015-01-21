@@ -1,3 +1,5 @@
 github.com/BurntSushi/toml #3883ac1ce943878302255f538fce319d23226223
 github.com/codegangsta/cli #bf4a526f48af7badd25d2cb02d587e1b01be3b50
+github.com/stretchr/objx #cbeaeb16a013161a98496fad62933b1d21786672
 github.com/stretchr/testify #e897f97d666c44ddbc131f4121c2961034b4c1b4
+golang.org/x/crypto/ssh #4ed45ec682102c643324fae5dff8dab085b6c300

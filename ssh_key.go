@@ -6,12 +6,11 @@ import (
 	"os/user"
 	"strings"
 
-	"github.com/JamesClonk/easy-vpn/config"
 	"github.com/JamesClonk/easy-vpn/provider"
 )
 
 func getEasyVpnSshKeyId(p provider.API) (keyId string) {
-	key := readPublicKey(p.GetConfig())
+	key := string(readKeyFile(p.GetConfig().PublicKeyFile))
 
 	// first lets get all currently installed ssh-keys
 	keys, err := p.GetInstalledSshKeys()
@@ -48,13 +47,13 @@ func getEasyVpnSshKeyId(p provider.API) (keyId string) {
 	return keyId
 }
 
-func readPublicKey(cfg *config.Config) string {
-	data, err := ioutil.ReadFile(sanitizeFilename(cfg.PublicKeyFile))
+func readKeyFile(filename string) []byte {
+	data, err := ioutil.ReadFile(sanitizeFilename(filename))
 	if err != nil {
-		log.Println("Could not read public key file")
+		log.Println("Could not read ssh key file: " + filename)
 		log.Fatal(err)
 	}
-	return string(data)
+	return data
 }
 
 func sanitizeFilename(filename string) string {

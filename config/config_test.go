@@ -38,7 +38,7 @@ func Test_Config_LoadConfiguration_Providers(t *testing.T) {
 	if assert.NotNil(t, testConfig) {
 		assert.Equal(t, "abcdefg123xyz", testConfig.Providers["digitalocean"].ApiKey)
 		assert.Equal(t, "nyc3", testConfig.Providers["digitalocean"].Region)
-		assert.Equal(t, "1024m", testConfig.Providers["digitalocean"].Size)
+		assert.Equal(t, "1024mb", testConfig.Providers["digitalocean"].Size)
 		assert.Equal(t, "ubuntu-14-10-i386", testConfig.Providers["digitalocean"].OS)
 
 		assert.Equal(t, "xyzabcdefg999", testConfig.Providers["vultr"].ApiKey)

@@ -42,7 +42,7 @@ func Test_Main_GetEasyVpnSshKeyId(t *testing.T) {
 	}
 }
 
-func Test_Main_ReadPublicKey(t *testing.T) {
+func Test_Main_ReadKeyFile(t *testing.T) {
 	set := flag.NewFlagSet("test", 0)
 	set.String("config", "fixtures/config_test.toml", "...")
 	c := cli.NewContext(nil, nil, set)
@@ -52,9 +52,14 @@ func Test_Main_ReadPublicKey(t *testing.T) {
 		assert.Equal(t, "vultr", cfg.Provider)
 	}
 
-	key := readPublicKey(cfg)
-	if assert.NotNil(t, key) {
-		assert.Equal(t, "this would be a public key!\n;)\n", key)
+	pubkey := string(readKeyFile(cfg.PublicKeyFile))
+	if assert.NotNil(t, pubkey) {
+		assert.Equal(t, "this would be a public key!\n;)\n", pubkey)
+	}
+
+	privkey := string(readKeyFile(cfg.PrivateKeyFile))
+	if assert.NotNil(t, privkey) {
+		assert.Equal(t, "this would be a private key!\n;)\n", privkey)
 	}
 }
 

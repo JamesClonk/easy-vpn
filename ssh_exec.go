@@ -27,13 +27,13 @@ func sshExecCmd(p provider.API, ip string, cmd string) {
 
 	client, err := ssh.Dial("tcp", ip+":22", config)
 	if err != nil {
-		log.Println("Failed to connect to: " + ip)
+		log.Println("Could not connect to: " + ip)
 		log.Fatal(err)
 	}
 
 	session, err := client.NewSession()
 	if err != nil {
-		log.Println("Failed to create SSH session")
+		log.Println("Could not create SSH session")
 		log.Fatal(err)
 	}
 	defer session.Close()
@@ -43,7 +43,7 @@ func sshExecCmd(p provider.API, ip string, cmd string) {
 	session.Stdout = &stdOut
 	session.Stderr = &stdErr
 	if err := session.Run(cmd); err != nil {
-		log.Println("Failed to run remote cmd through SSH: " + cmd)
+		log.Println("Could not run remote cmd through SSH: " + cmd)
 		log.Println(stdErr.String())
 		log.Fatal(err)
 	}

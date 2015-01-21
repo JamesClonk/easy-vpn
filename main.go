@@ -112,11 +112,11 @@ func startVpn(c *cli.Context) {
 	sshExecCmd(p, vm.IP, `apt-get install -qy docker pptpd iptables`)
 
 	// setup docker
-	sshExecCmd(p, vm.IP, `docker pull JamesClonk/docker-pptpd`)
+	sshExecCmd(p, vm.IP, `docker pull jamesclonk/docker-pptpd`)
 	sshExecCmd(p, vm.IP, `echo "easy-vpn * secret-password *" >> /chap-secrets`)
 
 	// run docker
-	sshExecCmd(p, vm.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro JamesClonk/docker-pptpd`)
+	sshExecCmd(p, vm.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
 }
 
 func destroyVpn(c *cli.Context) {

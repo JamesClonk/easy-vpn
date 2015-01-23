@@ -21,7 +21,7 @@ func init() {
 	}
 }
 
-func Test_Main_GetEasyVpnKeyId(t *testing.T) {
+func Test_SSH_GetEasyVpnKeyId(t *testing.T) {
 	mockedProvider1 := test.MockProvider{
 		Config: cfg,
 		Keys: []provider.SshKey{
@@ -48,7 +48,7 @@ func Test_Main_GetEasyVpnKeyId(t *testing.T) {
 	}
 }
 
-func Test_Main_ReadKeyFile(t *testing.T) {
+func Test_SSH_ReadKeyFile(t *testing.T) {
 	if assert.NotNil(t, cfg) {
 		assert.Equal(t, "vultr", cfg.Provider)
 	}
@@ -64,7 +64,7 @@ func Test_Main_ReadKeyFile(t *testing.T) {
 	}
 }
 
-func Test_Main_SanitizeFilename(t *testing.T) {
+func Test_SSH_SanitizeFilename(t *testing.T) {
 	filename := sanitizeFilename("~/test/123.txt")
 	if assert.NotNil(t, filename) {
 		usr, _ := user.Current()

@@ -20,7 +20,7 @@ func init() {
 	}
 }
 
-func Test_Main_GetAll(t *testing.T) {
+func Test_VM_GetAll(t *testing.T) {
 	mockedProvider1 := test.MockProvider{
 		Config: cfg,
 		VMs: []provider.VM{
@@ -43,4 +43,58 @@ func Test_Main_GetAll(t *testing.T) {
 	mockedProvider2 := test.MockProvider{Config: cfg}
 	machines2 := GetAll(mockedProvider2)
 	assert.Nil(t, machines2)
+}
+
+func Test_VM_DestroyEasyVpn_NonExisting(t *testing.T) {
+	mockedProvider := test.MockProvider{
+		Config: cfg,
+		VMs: []provider.VM{
+			provider.VM{},
+		},
+	}
+
+	DestroyEasyVpn(mockedProvider, "does not exist")
+}
+
+func Test_VM_WaitForNewVM(t *testing.T) {
+	mockedProvider := test.MockProvider{
+		Config: cfg,
+		VMs: []provider.VM{
+			provider.VM{
+				Name: "easy-vpn",
+				Id:   "mockId",
+			},
+			provider.VM{
+				Name: "mockName",
+			},
+		},
+	}
+
+	var vm provider.VM
+	waitForNewVM(mockedProvider, &vm, "easy-vpn")
+	if assert.NotNil(t, vm) {
+		assert.Equal(t, "mockId", vm.Id)
+	}
+}
+
+func Test_VM_statusOfVM(t *testing.T) {
+	mockedProvider := test.MockProvider{
+		Config: cfg,
+		VMs: []provider.VM{
+			provider.VM{
+				Name:   "easy-vpn",
+				Id:     "mockId",
+				Status: "active",
+			},
+		},
+	}
+
+	vm := provider.VM{
+		Id: "mockId",
+	}
+
+	statusOfVM(mockedProvider, &vm)
+	if assert.NotNil(t, vm) {
+		assert.Equal(t, "active", vm.Status)
+	}
 }

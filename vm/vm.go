@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/JamesClonk/easy-vpn/provider"
+	"github.com/JamesClonk/easy-vpn/ssh"
 )
 
 func GetAll(p provider.API) []provider.VM {
@@ -50,8 +51,8 @@ func GetEasyVpn(p provider.API, sshkeyId string, vmName string) (vm provider.VM)
 	}
 
 	// make sure its up and running
-	statusOfVM(p, &vm, vmName)
-	// this is needed because vultr does a dist-upgrade on new vms
+	statusOfVM(p, &vm)
+	// this is needed because some providers such as vultr do a dist-upgrade on new vms
 	readynessOfVM(p, &vm)
 
 	fmt.Println()
@@ -120,35 +121,47 @@ POLL:
 		}
 		time.Sleep(15 * time.Second)
 	}
-
-	return
+	fmt.Printf("\nVirtual machine created: %q\n", vm) // TODO: prettify
 }
 
-func statusOfVM(p provider.API, vm *provider.VM, vmName string) {
+func statusOfVM(p provider.API, vm *provider.VM) {
 	ticker := ticker()
 
 	// TODO: maybe have some maximum waiting/polling time for doing a timeout
 POLL:
 	for {
 		for _, machine := range GetAll(p) {
-			if machine.Name == vmName && 
-			machine.Status == "active" {
+			if machine.Id == vm.Id &&
+				machine.Status == "active" {
 				vm.Status = machine.Status
 
 				ticker.Stop()
 				break POLL
 			}
 		}
-		time.Sleep(15 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
+	fmt.Printf("\nVirtual machine is active\n")
 }
 
 func readynessOfVM(p provider.API, vm *provider.VM) {
-	// TODO: check if vm is ready to receive apt-get calls
+	ticker := ticker()
+
+	// TODO: maybe have some maximum waiting/polling time for doing a timeout
+POLL:
+	for {
+		out := ssh.Exec(p, vm.IP, "ps -ef | grep apt-get | grep -v grep")
+		if !strings.Contains(out, "apt-get") {
+			ticker.Stop()
+			break POLL
+		}
+		time.Sleep(15 * time.Second)
+	}
+	fmt.Printf("\nVirtual machine is ready\n")
 }
 
 func ticker() *time.Ticker {
-	ticker := time.NewTicker(2 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
 	go func() {
 		for range ticker.C {
 			fmt.Print(".")

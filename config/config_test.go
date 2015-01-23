@@ -7,49 +7,49 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var testConfig *Config
+var cfg *Config
 
 func init() {
 	var err error
-	testConfig, err = LoadConfiguration("../fixtures/config_test.toml")
+	cfg, err = LoadConfiguration("../fixtures/config_test.toml")
 	if err != nil {
 		log.Println(err)
 	}
 }
 
 func Test_Config_LoadConfiguration(t *testing.T) {
-	if assert.NotNil(t, testConfig) {
-		assert.Equal(t, "vultr", testConfig.Provider)
-		assert.Equal(t, "fixtures/vps_rsa", testConfig.PrivateKeyFile)
-		assert.Equal(t, "fixtures/vps_rsa.pub", testConfig.PublicKeyFile)
-		assert.Equal(t, 5, testConfig.Sleep)
+	if assert.NotNil(t, cfg) {
+		assert.Equal(t, "vultr", cfg.Provider)
+		assert.Equal(t, "../fixtures/vps_rsa", cfg.PrivateKeyFile)
+		assert.Equal(t, "../fixtures/vps_rsa.pub", cfg.PublicKeyFile)
+		assert.Equal(t, 5, cfg.Sleep)
 	}
 }
 
 func Test_Config_LoadConfiguration_Options(t *testing.T) {
-	if assert.NotNil(t, testConfig) {
-		assert.Equal(t, 20, testConfig.Options.Idletime)
-		assert.Equal(t, 300, testConfig.Options.Uptime)
-		assert.Equal(t, false, testConfig.Options.Autoconnect)
+	if assert.NotNil(t, cfg) {
+		assert.Equal(t, 20, cfg.Options.Idletime)
+		assert.Equal(t, 300, cfg.Options.Uptime)
+		assert.Equal(t, false, cfg.Options.Autoconnect)
 	}
 }
 
 func Test_Config_LoadConfiguration_Providers(t *testing.T) {
-	if assert.NotNil(t, testConfig) {
-		assert.Equal(t, "abcdefg123xyz", testConfig.Providers["digitalocean"].ApiKey)
-		assert.Equal(t, "nyc3", testConfig.Providers["digitalocean"].Region)
-		assert.Equal(t, "1024mb", testConfig.Providers["digitalocean"].Size)
-		assert.Equal(t, "ubuntu-14-10-i386", testConfig.Providers["digitalocean"].OS)
+	if assert.NotNil(t, cfg) {
+		assert.Equal(t, "abcdefg123xyz", cfg.Providers["digitalocean"].ApiKey)
+		assert.Equal(t, "nyc3", cfg.Providers["digitalocean"].Region)
+		assert.Equal(t, "1024mb", cfg.Providers["digitalocean"].Size)
+		assert.Equal(t, "ubuntu-14-10-i386", cfg.Providers["digitalocean"].OS)
 
-		assert.Equal(t, "xyzabcdefg999", testConfig.Providers["vultr"].ApiKey)
-		assert.Equal(t, "7", testConfig.Providers["vultr"].Region)
-		assert.Equal(t, "2", testConfig.Providers["vultr"].Size)
-		assert.Equal(t, "128", testConfig.Providers["vultr"].OS)
+		assert.Equal(t, "xyzabcdefg999", cfg.Providers["vultr"].ApiKey)
+		assert.Equal(t, "7", cfg.Providers["vultr"].Region)
+		assert.Equal(t, "2", cfg.Providers["vultr"].Size)
+		assert.Equal(t, "128", cfg.Providers["vultr"].OS)
 
-		assert.Equal(t, "xyz1234567890", testConfig.Providers["aws"].ApiKey)
-		assert.Equal(t, "9", testConfig.Providers["aws"].Region)
-		assert.Equal(t, "7", testConfig.Providers["aws"].Size)
-		assert.Equal(t, "999", testConfig.Providers["aws"].OS)
+		assert.Equal(t, "xyz1234567890", cfg.Providers["aws"].ApiKey)
+		assert.Equal(t, "9", cfg.Providers["aws"].Region)
+		assert.Equal(t, "7", cfg.Providers["aws"].Size)
+		assert.Equal(t, "999", cfg.Providers["aws"].OS)
 	}
 }
 

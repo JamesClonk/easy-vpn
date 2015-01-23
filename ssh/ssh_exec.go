@@ -1,4 +1,4 @@
-package main
+package ssh
 
 import (
 	"bytes"
@@ -7,15 +7,15 @@ import (
 	"log"
 
 	"github.com/JamesClonk/easy-vpn/provider"
-	"golang.org/x/crypto/ssh"
+	gossh "golang.org/x/crypto/ssh"
 )
 
-func sshCall(p provider.API, ip string, cmd string) {
-	fmt.Println(sshExec(p, ip, cmd))
+func Call(p provider.API, ip string, cmd string) {
+	fmt.Println(Exec(p, ip, cmd))
 }
 
-func sshExec(p provider.API, ip string, cmd string) string {
-	out, err := sshRun(p, ip, cmd)
+func Exec(p provider.API, ip string, cmd string) string {
+	out, err := Run(p, ip, cmd)
 	if err != nil {
 		log.Println("Could not run command through SSH: " + cmd)
 		log.Fatal(err)
@@ -23,23 +23,23 @@ func sshExec(p provider.API, ip string, cmd string) string {
 	return out
 }
 
-func sshRun(p provider.API, ip string, cmd string) (string, error) {
+func Run(p provider.API, ip string, cmd string) (string, error) {
 	key := readKeyFile(p.GetConfig().PrivateKeyFile)
 
-	signer, err := ssh.ParsePrivateKey(key)
+	signer, err := gossh.ParsePrivateKey(key)
 	if err != nil {
 		log.Println("Could not parse private key")
 		log.Fatal(err)
 	}
 
-	config := &ssh.ClientConfig{
+	config := &gossh.ClientConfig{
 		User: "root",
-		Auth: []ssh.AuthMethod{
-			ssh.PublicKeys(signer),
+		Auth: []gossh.AuthMethod{
+			gossh.PublicKeys(signer),
 		},
 	}
 
-	client, err := ssh.Dial("tcp", ip+":22", config)
+	client, err := gossh.Dial("tcp", ip+":22", config)
 	if err != nil {
 		log.Println("Could not connect to: " + ip)
 		log.Fatal(err)

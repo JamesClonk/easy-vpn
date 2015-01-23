@@ -11,6 +11,8 @@ import (
 	"github.com/JamesClonk/easy-vpn/provider"
 	"github.com/JamesClonk/easy-vpn/provider/digitalocean"
 	"github.com/JamesClonk/easy-vpn/provider/vultr"
+	"github.com/JamesClonk/easy-vpn/ssh"
+	"github.com/JamesClonk/easy-vpn/vm"
 	"github.com/codegangsta/cli"
 )
 
@@ -105,37 +107,37 @@ func main() {
 func startVpn(c *cli.Context) {
 	p := getProvider(c)
 
-	sshkeyId := getEasyVpnSshKeyId(p)
-	vm := getEasyVpnVM(p, sshkeyId)
+	sshkeyId := ssh.GetEasyVpnKeyId(p, EASYVPN_IDENTIFIER)
+	machine := vm.GetEasyVpn(p, sshkeyId, EASYVPN_IDENTIFIER)
 
-	fmt.Printf("%q\n", vm) // TODO: prettify
+	fmt.Printf("%q\n", machine) // TODO: prettify
 
 	// update machine
 	fmt.Println("\nUpdate VM")
-	sshCall(p, vm.IP, `apt-get update -qq`)
-	sshCall(p, vm.IP, `apt-get install -qy docker.io pptpd iptables`)
-	sshExec(p, vm.IP, `service pptpd stop`)
+	ssh.Call(p, machine.IP, `apt-get update -qq`)
+	ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables`)
+	ssh.Exec(p, machine.IP, `service pptpd stop`)
 
 	// setup docker
 	fmt.Println("\nSetup docker on VM")
-	sshCall(p, vm.IP, `service docker.io restart`)
-	sshCall(p, vm.IP, `docker pull jamesclonk/docker-pptpd`)
-	sshExec(p, vm.IP, `echo "easy-vpn * secret-password *" >> /chap-secrets`)
+	ssh.Call(p, machine.IP, `service docker.io restart`)
+	ssh.Call(p, machine.IP, `docker pull jamesclonk/docker-pptpd`)
+	ssh.Exec(p, machine.IP, `echo "easy-vpn * secret-password *" >> /chap-secrets`)
 
 	// run docker
 	fmt.Println("\nRun docker pptpd container on VM")
-	sshCall(p, vm.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
+	ssh.Call(p, machine.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
 }
 
 func destroyVpn(c *cli.Context) {
 	p := getProvider(c)
-	destroyEasyVpnVM(p)
+	vm.DestroyEasyVpn(p, EASYVPN_IDENTIFIER)
 }
 
 func showVpn(c *cli.Context) {
 	p := getProvider(c)
-	for _, vm := range getAllVMs(p) {
-		fmt.Printf("%q\n", vm) // TODO: prettify
+	for _, machine := range vm.GetAll(p) {
+		fmt.Printf("%q\n", machine) // TODO: prettify
 	}
 }
 

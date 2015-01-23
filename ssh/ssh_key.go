@@ -1,4 +1,4 @@
-package main
+package ssh
 
 import (
 	"io/ioutil"
@@ -9,7 +9,7 @@ import (
 	"github.com/JamesClonk/easy-vpn/provider"
 )
 
-func getEasyVpnSshKeyId(p provider.API) (keyId string) {
+func GetEasyVpnKeyId(p provider.API, keyName string) (keyId string) {
 	key := string(readKeyFile(p.GetConfig().PublicKeyFile))
 
 	// first lets get all currently installed ssh-keys
@@ -22,7 +22,7 @@ func getEasyVpnSshKeyId(p provider.API) (keyId string) {
 	// then check to see if easy-vpn ssh-key is already installed
 	keyInstalled := false
 	for _, key := range keys {
-		if key.Name == EASYVPN_IDENTIFIER {
+		if key.Name == keyName {
 			keyId = key.Id
 			keyInstalled = true
 			break
@@ -31,13 +31,13 @@ func getEasyVpnSshKeyId(p provider.API) (keyId string) {
 
 	// if it is already installed, update it to make sure its public-key is up-to-date
 	if keyInstalled {
-		keyId, err = p.UpdateSshKey(keyId, EASYVPN_IDENTIFIER, key)
+		keyId, err = p.UpdateSshKey(keyId, keyName, key)
 		if err != nil {
 			log.Println("Could not update SSH-Key")
 			log.Fatal(err)
 		}
 	} else { // otherwise, install as a new ssh-key
-		keyId, err = p.InstallNewSshKey(EASYVPN_IDENTIFIER, key)
+		keyId, err = p.InstallNewSshKey(keyName, key)
 		if err != nil {
 			log.Println("Could not install SSH-Key")
 			log.Fatal(err)

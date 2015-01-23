@@ -1,4 +1,4 @@
-package main
+package vm
 
 import (
 	"bufio"
@@ -11,7 +11,7 @@ import (
 	"github.com/JamesClonk/easy-vpn/provider"
 )
 
-func getAllVMs(p provider.API) []provider.VM {
+func GetAll(p provider.API) []provider.VM {
 	machines, err := p.GetAllVMs()
 	if err != nil {
 		log.Println("Could not retrieve list of virtual machines")
@@ -20,7 +20,7 @@ func getAllVMs(p provider.API) []provider.VM {
 	return machines
 }
 
-func getEasyVpnVM(p provider.API, sshkeyId string) (vm provider.VM) {
+func GetEasyVpn(p provider.API, sshkeyId string, vmName string) (vm provider.VM) {
 	cfg := p.GetConfig()
 	os := cfg.Providers[cfg.Provider].OS
 	size := cfg.Providers[cfg.Provider].Size
@@ -28,45 +28,44 @@ func getEasyVpnVM(p provider.API, sshkeyId string) (vm provider.VM) {
 
 	// check to see if easy-vpn vm already exists
 	vmExists := false
-	for _, machine := range getAllVMs(p) {
-		if machine.Name == EASYVPN_IDENTIFIER {
+	for _, machine := range GetAll(p) {
+		if machine.Name == vmName {
 			vm = machine
 			vmExists = true
 			break
 		}
 	}
 
-	// if it already exists, make sure its up and running
 	if vmExists {
 		fmt.Println("Virtual machine already exists")
-		statusOfVM(p, &vm)
-	} else { // otherwise, create a new vm and start it
+	} else { // create a new vm and start it if it did not yet exist
 		fmt.Println("Create new virtual machine")
 
-		_, err := p.CreateVM(EASYVPN_IDENTIFIER, os, size, region, sshkeyId)
+		_, err := p.CreateVM(vmName, os, size, region, sshkeyId)
 		if err != nil {
 			log.Println("Could not create new virtual machine")
 			log.Fatal(err)
 		}
-
-		waitForNewVM(p, &vm)
-		statusOfVM(p, &vm)
-
-		// this is needed because vultr does a dist-upgrade on new vms
-		readynessOfVM(p, &vm)
+		waitForNewVM(p, &vm, vmName)
 	}
+
+	// make sure its up and running
+	statusOfVM(p, &vm, vmName)
+	// this is needed because vultr does a dist-upgrade on new vms
+	readynessOfVM(p, &vm)
+
 	fmt.Println()
 
 	return
 }
 
-func destroyEasyVpnVM(p provider.API) {
+func DestroyEasyVpn(p provider.API, vmName string) {
 	var vm provider.VM
 
 	// check to see if easy-vpn vm actually exists
 	vmExists := false
-	for _, machine := range getAllVMs(p) {
-		if machine.Name == EASYVPN_IDENTIFIER {
+	for _, machine := range GetAll(p) {
+		if machine.Name == vmName {
 			vm = machine
 			vmExists = true
 			break
@@ -100,14 +99,14 @@ func destroyEasyVpnVM(p provider.API) {
 
 }
 
-func waitForNewVM(p provider.API, vm *provider.VM) {
+func waitForNewVM(p provider.API, vm *provider.VM, vmName string) {
 	ticker := ticker()
 
 	// TODO: maybe have some maximum waiting/polling time for doing a timeout
 POLL:
 	for {
-		for _, machine := range getAllVMs(p) {
-			if machine.Name == EASYVPN_IDENTIFIER {
+		for _, machine := range GetAll(p) {
+			if machine.Name == vmName {
 				vm.Id = machine.Id
 				vm.Name = machine.Id
 				vm.Status = machine.Status
@@ -125,14 +124,15 @@ POLL:
 	return
 }
 
-func statusOfVM(p provider.API, vm *provider.VM) {
+func statusOfVM(p provider.API, vm *provider.VM, vmName string) {
 	ticker := ticker()
 
 	// TODO: maybe have some maximum waiting/polling time for doing a timeout
 POLL:
 	for {
-		for _, machine := range getAllVMs(p) {
-			if machine.Name == EASYVPN_IDENTIFIER && machine.Status == "active" {
+		for _, machine := range GetAll(p) {
+			if machine.Name == vmName && 
+			machine.Status == "active" {
 				vm.Status = machine.Status
 
 				ticker.Stop()

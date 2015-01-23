@@ -51,6 +51,9 @@ func getEasyVpnVM(p provider.API, sshkeyId string) (vm provider.VM) {
 
 		waitForNewVM(p, &vm)
 		statusOfVM(p, &vm)
+
+		// this is needed because vultr does a dist-upgrade on new vms
+		readynessOfVM(p, &vm)
 	}
 	fmt.Println()
 
@@ -138,6 +141,10 @@ POLL:
 		}
 		time.Sleep(15 * time.Second)
 	}
+}
+
+func readynessOfVM(p provider.API, vm *provider.VM) {
+	// TODO: check if vm is ready to receive apt-get calls
 }
 
 func ticker() *time.Ticker {

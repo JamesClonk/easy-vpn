@@ -61,10 +61,11 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{{
-		Name:        "up",
-		ShortName:   "u",
-		Usage:       "spin up a new VPS with a VPN server in it",
-		Description: ".....", // TODO: add description, explain -r/--region option
+		Name:      "up",
+		ShortName: "u",
+		Usage:     "spin up a new VPS with a VPN server in it",
+		// TODO: add description, explain -r/--region option
+		Description: ".....",
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "region, r",
@@ -75,18 +76,20 @@ func main() {
 			startVpn(c)
 		},
 	}, {
-		Name:        "down",
-		ShortName:   "d",
-		Usage:       "shutdown and destroy a VPS",
-		Description: ".....", // TODO: add description, tell that it requires 1 argument: the VPS name/id to destroy
+		Name:      "down",
+		ShortName: "d",
+		Usage:     "shutdown and destroy a VPS",
+		// TODO: add description, tell that it requires 1 argument: the VPS name/id to destroy
+		Description: ".....",
 		Action: func(c *cli.Context) {
 			destroyVpn(c)
 		},
 	}, {
-		Name:        "show",
-		ShortName:   "s",
-		Usage:       "shows all current VPN-VPS and their status",
-		Description: ".....", // TODO: add description, will list all current VPS and their status that match naming criteria
+		Name:      "show",
+		ShortName: "s",
+		Usage:     "shows all current VPN-VPS and their status",
+		// TODO: add description, will list all current VPS and their status that match naming criteria
+		Description: ".....",
 		Action: func(c *cli.Context) {
 			showVpn(c)
 		},
@@ -108,17 +111,20 @@ func startVpn(c *cli.Context) {
 	fmt.Printf("%q\n", vm) // TODO: prettify
 
 	// update machine
-	sshExecCmd(p, vm.IP, `apt-get update -qq`)
-	sshExecCmd(p, vm.IP, `apt-get install -qy docker.io pptpd iptables`)
-	sshExecCmd(p, vm.IP, `service pptpd stop`)
+	fmt.Println("\nUpdate VM")
+	sshCall(p, vm.IP, `apt-get update -qq`)
+	sshCall(p, vm.IP, `apt-get install -qy docker.io pptpd iptables`)
+	sshExec(p, vm.IP, `service pptpd stop`)
 
 	// setup docker
-	sshExecCmd(p, vm.IP, `service docker.io restart`)
-	sshExecCmd(p, vm.IP, `docker pull jamesclonk/docker-pptpd`)
-	sshExecCmd(p, vm.IP, `echo "easy-vpn * secret-password *" >> /chap-secrets`)
+	fmt.Println("\nSetup docker on VM")
+	sshCall(p, vm.IP, `service docker.io restart`)
+	sshCall(p, vm.IP, `docker pull jamesclonk/docker-pptpd`)
+	sshExec(p, vm.IP, `echo "easy-vpn * secret-password *" >> /chap-secrets`)
 
 	// run docker
-	sshExecCmd(p, vm.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
+	fmt.Println("\nRun docker pptpd container on VM")
+	sshCall(p, vm.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
 }
 
 func destroyVpn(c *cli.Context) {
@@ -159,7 +165,8 @@ func parseGlobalOptions(c *cli.Context) *config.Config {
 	if c.GlobalIsSet("idletime") {
 		idletime, err := strconv.ParseInt(c.GlobalString("idletime"), 10, 32)
 		if err != nil {
-			log.Fatalf("Invalid value for --idletime option given: %v\n", c.GlobalString("idletime"))
+			log.Fatalf("Invalid value for --idletime option given: %v\n",
+				c.GlobalString("idletime"))
 		}
 		cfg.Options.Idletime = int(idletime)
 	}
@@ -167,7 +174,8 @@ func parseGlobalOptions(c *cli.Context) *config.Config {
 	if c.GlobalIsSet("uptime") {
 		uptime, err := strconv.ParseInt(c.GlobalString("uptime"), 10, 32)
 		if err != nil {
-			log.Fatalf("Invalid value for --uptime option given: %v\n", c.GlobalString("uptime"))
+			log.Fatalf("Invalid value for --uptime option given: %v\n",
+				c.GlobalString("uptime"))
 		}
 		cfg.Options.Uptime = int(uptime)
 	}

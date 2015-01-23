@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 
@@ -9,7 +10,20 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-func sshExecCmd(p provider.API, ip string, cmd string) {
+func sshCall(p provider.API, ip string, cmd string) {
+	fmt.Println(sshExec(p, ip, cmd))
+}
+
+func sshExec(p provider.API, ip string, cmd string) string {
+	out, err := sshRun(p, ip, cmd)
+	if err != nil {
+		log.Println("Could not run command through SSH: " + cmd)
+		log.Fatal(err)
+	}
+	return out
+}
+
+func sshRun(p provider.API, ip string, cmd string) (string, error) {
 	key := readKeyFile(p.GetConfig().PrivateKeyFile)
 
 	signer, err := ssh.ParsePrivateKey(key)
@@ -43,9 +57,8 @@ func sshExecCmd(p provider.API, ip string, cmd string) {
 	session.Stdout = &stdOut
 	session.Stderr = &stdErr
 	if err := session.Run(cmd); err != nil {
-		log.Println("Could not run remote cmd through SSH: " + cmd)
-		log.Println(stdErr.String())
-		log.Fatal(err)
+		return "", errors.New(fmt.Sprintf("%s\n%v", stdErr.String(), err))
 	}
-	fmt.Println(stdOut.String())
+
+	return stdOut.String(), nil
 }

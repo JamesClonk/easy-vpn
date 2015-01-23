@@ -101,6 +101,7 @@ func DestroyEasyVpn(p provider.API, vmName string) {
 }
 
 func waitForNewVM(p provider.API, vm *provider.VM, vmName string) {
+	fmt.Printf("Virtual machine installation")
 	ticker := ticker()
 
 	// TODO: maybe have some maximum waiting/polling time for doing a timeout
@@ -109,7 +110,7 @@ POLL:
 		for _, machine := range GetAll(p) {
 			if machine.Name == vmName {
 				vm.Id = machine.Id
-				vm.Name = machine.Id
+				vm.Name = machine.Name
 				vm.Status = machine.Status
 				vm.IP = machine.IP
 				vm.OS = machine.OS
@@ -125,6 +126,7 @@ POLL:
 }
 
 func statusOfVM(p provider.API, vm *provider.VM) {
+	fmt.Printf("Virtual machine status check")
 	ticker := ticker()
 
 	// TODO: maybe have some maximum waiting/polling time for doing a timeout
@@ -134,6 +136,7 @@ POLL:
 			if machine.Id == vm.Id &&
 				machine.Status == "active" {
 				vm.Status = machine.Status
+				vm.IP = machine.IP
 
 				ticker.Stop()
 				break POLL
@@ -145,13 +148,15 @@ POLL:
 }
 
 func readynessOfVM(p provider.API, vm *provider.VM) {
+	fmt.Printf("Virtual machine readyness check")
 	ticker := ticker()
 
 	// TODO: maybe have some maximum waiting/polling time for doing a timeout
 POLL:
 	for {
-		out := ssh.Exec(p, vm.IP, "ps -ef | grep apt-get | grep -v grep")
-		if !strings.Contains(out, "apt-get") {
+		// TODO: improve apt-get lock check
+		out := ssh.Exec(p, vm.IP, `lsof /var/lib/dpkg/lock >/dev/null 2>&1; [ $? = 0 ] && echo "locked"; echo "..."`)
+		if !strings.Contains(out, "locked") {
 			ticker.Stop()
 			break POLL
 		}

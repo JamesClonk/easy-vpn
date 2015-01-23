@@ -11,6 +11,7 @@ import (
 	"github.com/JamesClonk/easy-vpn/provider"
 	"github.com/JamesClonk/easy-vpn/provider/digitalocean"
 	"github.com/JamesClonk/easy-vpn/provider/vultr"
+	"github.com/JamesClonk/easy-vpn/rng"
 	"github.com/JamesClonk/easy-vpn/ssh"
 	"github.com/JamesClonk/easy-vpn/vm"
 	"github.com/codegangsta/cli"
@@ -112,21 +113,34 @@ func startVpn(c *cli.Context) {
 
 	fmt.Printf("%q\n", machine) // TODO: prettify
 
-	// update machine
-	fmt.Println("\nUpdate VM")
-	ssh.Call(p, machine.IP, `apt-get update -qq`)
-	ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables`)
-	ssh.Exec(p, machine.IP, `service pptpd stop`)
+	// check if docker pptpd is already running
+	out := ssh.Exec(p, machine.IP, `ps -ef | grep pptpd | grep -v grep; echo "..."`)
+	if strings.Contains(out, "pptpd") {
+		fmt.Println("pptpd is already running on virtual machine")
+	} else {
+		// update machine
+		log.Println("Update virtual machine")
+		ssh.Call(p, machine.IP, `apt-get update -qq`)
+		ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables`)
+		ssh.Exec(p, machine.IP, `service pptpd stop`)
 
-	// setup docker
-	fmt.Println("\nSetup docker on VM")
-	ssh.Call(p, machine.IP, `service docker.io restart`)
-	ssh.Call(p, machine.IP, `docker pull jamesclonk/docker-pptpd`)
-	ssh.Exec(p, machine.IP, `echo "easy-vpn * secret-password *" >> /chap-secrets`)
+		// generate username & password for pptpd
+		username := rng.GenerateUsername()
+		password := rng.GeneratePassword()
 
-	// run docker
-	fmt.Println("\nRun docker pptpd container on VM")
-	ssh.Call(p, machine.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
+		// setup docker
+		log.Println("Setup docker on virtual machine")
+		ssh.Call(p, machine.IP, `service docker.io restart`)
+		ssh.Call(p, machine.IP, `docker pull jamesclonk/docker-pptpd`)
+		ssh.Exec(p, machine.IP, fmt.Sprintf(`echo "%s * %s *" > /chap-secrets`, username, password))
+
+		// run docker
+		log.Println("Run docker-pptpd container on virtual machine")
+		ssh.Call(p, machine.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
+
+		log.Printf("docker-pptpd started, with username[%s] and password[%s]\n", username, password)
+	}
+
 }
 
 func destroyVpn(c *cli.Context) {

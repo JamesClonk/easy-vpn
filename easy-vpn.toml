@@ -19,4 +19,10 @@ os = "160" # 160 = Ubuntu 14.04 x64
 max_idletime = 15 # minutes
 max_uptime = 360 # minutes
 vpn_autoconnect = true
+# command(s) to run to automatically connect to vpn server
+# understands these 3 variables: $IP, $USER, $PASS
+autoconnect_cmd = [
+	["pptpsetup","--create easy-vpn","--server $IP","--username $USER","--password $PASS","--encrypt","--start"],
+	["ip","route","add","default","dev","ppp0"]
+]
 

@@ -21,9 +21,10 @@ type Provider struct {
 }
 
 type Options struct {
-	Idletime    int  `toml:"max_idletime"`
-	Uptime      int  `toml:"max_uptime"`
-	Autoconnect bool `toml:"vpn_autoconnect"`
+	Idletime    int        `toml:"max_idletime"`
+	Uptime      int        `toml:"max_uptime"`
+	Autoconnect bool       `toml:"vpn_autoconnect"`
+	ConnectCmd  [][]string `toml:"autoconnect_cmd"`
 }
 
 func LoadConfiguration(filename string) (config *Config, err error) {

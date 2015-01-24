@@ -25,4 +25,7 @@ os = "128"
 max_idletime = 20 # minutes
 max_uptime = 300 # minutes
 vpn_autoconnect = false
-
+autoconnect_cmd = [
+	["connect","$IP","$USER", "$PASS"],
+	["disconnect"]
+]

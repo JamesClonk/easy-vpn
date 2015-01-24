@@ -31,6 +31,8 @@ func Test_Config_LoadConfiguration_Options(t *testing.T) {
 		assert.Equal(t, 20, cfg.Options.Idletime)
 		assert.Equal(t, 300, cfg.Options.Uptime)
 		assert.Equal(t, false, cfg.Options.Autoconnect)
+		assert.Equal(t, [][]string{[]string{"connect", "$IP", "$USER", "$PASS"},
+			[]string{"disconnect"}}, cfg.Options.ConnectCmd)
 	}
 }
 

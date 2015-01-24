@@ -77,7 +77,7 @@ func Test_VM_WaitForNewVM(t *testing.T) {
 	}
 }
 
-func Test_VM_statusOfVM(t *testing.T) {
+func Test_VM_StatusOfVM(t *testing.T) {
 	mockedProvider := test.MockProvider{
 		Config: cfg,
 		VMs: []provider.VM{

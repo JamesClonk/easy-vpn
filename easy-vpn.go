@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/JamesClonk/easy-vpn/config"
 	"github.com/JamesClonk/easy-vpn/provider"
@@ -21,6 +23,14 @@ const (
 	VERSION            = "1.0.0"
 	EASYVPN_IDENTIFIER = "easy-vpn"
 )
+
+var (
+	writer = new(tabwriter.Writer)
+)
+
+func init() {
+	writer.Init(os.Stdout, 0, 8, 2, '\t', 0)
+}
 
 func main() {
 	app := cli.NewApp()
@@ -64,11 +74,10 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{{
-		Name:      "up",
-		ShortName: "u",
-		Usage:     "spin up a new VPS with a VPN server in it",
-		// TODO: add description, explain -r/--region option
-		Description: ".....",
+		Name:        "up",
+		ShortName:   "u",
+		Usage:       "spin up new vm",
+		Description: "Creates a new easy-vpn virtual machine and starts a docker-pptpd container in it.",
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "region, r",
@@ -79,20 +88,18 @@ func main() {
 			startVpn(c)
 		},
 	}, {
-		Name:      "down",
-		ShortName: "d",
-		Usage:     "shutdown and destroy a VPS",
-		// TODO: add description, tell that it requires 1 argument: the VPS name/id to destroy
-		Description: ".....",
+		Name:        "down",
+		ShortName:   "d",
+		Usage:       "shutdown and destroy",
+		Description: "Destroys/deletes the easy-vpn virtual machine if it exists.",
 		Action: func(c *cli.Context) {
 			destroyVpn(c)
 		},
 	}, {
-		Name:      "show",
-		ShortName: "s",
-		Usage:     "shows all current VPN-VPS and their status",
-		// TODO: add description, will list all current VPS and their status that match naming criteria
-		Description: ".....",
+		Name:        "show",
+		ShortName:   "s",
+		Usage:       "show all vm's",
+		Description: "Lists all your currently existing virtual machines.",
 		Action: func(c *cli.Context) {
 			showVpn(c)
 		},
@@ -111,7 +118,15 @@ func startVpn(c *cli.Context) {
 	sshkeyId := ssh.GetEasyVpnKeyId(p, EASYVPN_IDENTIFIER)
 	machine := vm.GetEasyVpn(p, sshkeyId, EASYVPN_IDENTIFIER)
 
-	fmt.Printf("%q\n", machine) // TODO: prettify
+	fmt.Println("=========================================================")
+	fmt.Fprintf(writer, "Id: %s\tName:%s\tIP:%s\n", machine.Id, machine.Name, machine.IP)
+	fmt.Fprintf(writer, "OS: %s\tRegion:%s\tStatus:%s\n", machine.OS, machine.Region, machine.Status)
+	writer.Flush()
+	fmt.Println("=========================================================")
+
+	// generate username & password for pptpd
+	username := rng.GenerateUsername()
+	password := rng.GeneratePassword()
 
 	// check if docker pptpd is already running
 	out := ssh.Exec(p, machine.IP, `ps -ef | grep pptpd | grep -v grep; echo "..."`)
@@ -119,28 +134,33 @@ func startVpn(c *cli.Context) {
 		fmt.Println("pptpd is already running on virtual machine")
 	} else {
 		// update machine
-		log.Println("Update virtual machine")
+		fmt.Println("Update virtual machine")
 		ssh.Call(p, machine.IP, `apt-get update -qq`)
 		ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables`)
 		ssh.Exec(p, machine.IP, `service pptpd stop`)
 
-		// generate username & password for pptpd
-		username := rng.GenerateUsername()
-		password := rng.GeneratePassword()
-
 		// setup docker
-		log.Println("Setup docker on virtual machine")
+		fmt.Println("Setup docker on virtual machine")
 		ssh.Call(p, machine.IP, `service docker.io restart`)
 		ssh.Call(p, machine.IP, `docker pull jamesclonk/docker-pptpd`)
 		ssh.Exec(p, machine.IP, fmt.Sprintf(`echo "%s * %s *" > /chap-secrets`, username, password))
 
 		// run docker
-		log.Println("Run docker-pptpd container on virtual machine")
+		fmt.Println("Run docker-pptpd container on virtual machine")
 		ssh.Call(p, machine.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
 
 		log.Printf("docker-pptpd started, with username[%s] and password[%s]\n", username, password)
 	}
 
+	// connect to vpn server if autoconnect option is on
+	if p.GetConfig().Options.Autoconnect {
+		connect(
+			p.GetConfig().Options.ConnectCmd,
+			machine.IP,
+			username,
+			password,
+		)
+	}
 }
 
 func destroyVpn(c *cli.Context) {
@@ -151,8 +171,41 @@ func destroyVpn(c *cli.Context) {
 func showVpn(c *cli.Context) {
 	p := getProvider(c)
 	for _, machine := range vm.GetAll(p) {
-		fmt.Printf("%q\n", machine) // TODO: prettify
+		fmt.Println("=========================================================")
+		fmt.Fprintf(writer, "Id: %s\tName:%s\tIP:%s\n", machine.Id, machine.Name, machine.IP)
+		fmt.Fprintf(writer, "OS: %s\tRegion:%s\tStatus:%s\n", machine.OS, machine.Region, machine.Status)
+		writer.Flush()
 	}
+	fmt.Println("=========================================================")
+}
+
+func connect(commands [][]string, ip, username, password string) {
+	commands = replaceCommandVariables(commands, ip, username, password)
+
+	for _, command := range commands {
+		out, err := exec.Command(command[0], command[1:]...).CombinedOutput()
+		if err != nil {
+			log.Println(string(out))
+			log.Fatal(err)
+		}
+		fmt.Println(string(out))
+	}
+}
+
+func replaceCommandVariables(commands [][]string, ip, username, password string) [][]string {
+	result := make([][]string, len(commands))
+	for i, command := range commands {
+		cmd := make([]string, len(command))
+		for j, arg := range command {
+			arg = strings.Replace(arg, "$IP", ip, -1)
+			arg = strings.Replace(arg, "$USER", username, -1)
+			arg = strings.Replace(arg, "$PASS", password, -1)
+			cmd[j] = arg
+		}
+		result[i] = cmd
+	}
+
+	return result
 }
 
 func parseGlobalOptions(c *cli.Context) *config.Config {
@@ -181,8 +234,7 @@ func parseGlobalOptions(c *cli.Context) *config.Config {
 	if c.GlobalIsSet("idletime") {
 		idletime, err := strconv.ParseInt(c.GlobalString("idletime"), 10, 32)
 		if err != nil {
-			log.Fatalf("Invalid value for --idletime option given: %v\n",
-				c.GlobalString("idletime"))
+			log.Fatalf("Invalid value for --idletime option given: %v\n", c.GlobalString("idletime"))
 		}
 		cfg.Options.Idletime = int(idletime)
 	}
@@ -190,10 +242,18 @@ func parseGlobalOptions(c *cli.Context) *config.Config {
 	if c.GlobalIsSet("uptime") {
 		uptime, err := strconv.ParseInt(c.GlobalString("uptime"), 10, 32)
 		if err != nil {
-			log.Fatalf("Invalid value for --uptime option given: %v\n",
-				c.GlobalString("uptime"))
+			log.Fatalf("Invalid value for --uptime option given: %v\n", c.GlobalString("uptime"))
 		}
 		cfg.Options.Uptime = int(uptime)
+	}
+
+	if c.IsSet("region") {
+		cfg.Providers[cfg.Provider] = config.Provider{
+			ApiKey: cfg.Providers[cfg.Provider].ApiKey,
+			Region: c.String("region"),
+			Size:   cfg.Providers[cfg.Provider].Size,
+			OS:     cfg.Providers[cfg.Provider].OS,
+		}
 	}
 
 	return cfg

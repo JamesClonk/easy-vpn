@@ -118,11 +118,11 @@ func startVpn(c *cli.Context) {
 	sshkeyId := ssh.GetEasyVpnKeyId(p, EASYVPN_IDENTIFIER)
 	machine := vm.GetEasyVpn(p, sshkeyId, EASYVPN_IDENTIFIER)
 
-	fmt.Println("=========================================================")
-	fmt.Fprintf(writer, "Id: %s\tName:%s\tIP:%s\n", machine.Id, machine.Name, machine.IP)
-	fmt.Fprintf(writer, "OS: %s\tRegion:%s\tStatus:%s\n", machine.OS, machine.Region, machine.Status)
+	fmt.Println("=========================================================================")
+	fmt.Fprintf(writer, "Id: %s\tName: %s\tIP: %s\n", machine.Id, machine.Name, machine.IP)
+	fmt.Fprintf(writer, "OS: %s\tRegion: %s\tStatus: %s\n", machine.OS, machine.Region, machine.Status)
 	writer.Flush()
-	fmt.Println("=========================================================")
+	fmt.Println("=========================================================================")
 
 	// generate username & password for pptpd
 	username := rng.GenerateUsername()
@@ -149,7 +149,7 @@ func startVpn(c *cli.Context) {
 		fmt.Println("Run docker-pptpd container on virtual machine")
 		ssh.Call(p, machine.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
 
-		log.Printf("docker-pptpd started, with username[%s] and password[%s]\n", username, password)
+		log.Printf("docker-pptpd started, with username [%s] and password [%s]\n", username, password)
 	}
 
 	// connect to vpn server if autoconnect option is on
@@ -171,12 +171,12 @@ func destroyVpn(c *cli.Context) {
 func showVpn(c *cli.Context) {
 	p := getProvider(c)
 	for _, machine := range vm.GetAll(p) {
-		fmt.Println("=========================================================")
-		fmt.Fprintf(writer, "Id: %s\tName:%s\tIP:%s\n", machine.Id, machine.Name, machine.IP)
-		fmt.Fprintf(writer, "OS: %s\tRegion:%s\tStatus:%s\n", machine.OS, machine.Region, machine.Status)
+		fmt.Println("=========================================================================")
+		fmt.Fprintf(writer, "Id: %s\tName: %s\tIP: %s\n", machine.Id, machine.Name, machine.IP)
+		fmt.Fprintf(writer, "OS: %s\tRegion: %s\tStatus: %s\n", machine.OS, machine.Region, machine.Status)
 		writer.Flush()
 	}
-	fmt.Println("=========================================================")
+	fmt.Println("=========================================================================")
 }
 
 func connect(commands [][]string, ip, username, password string) {

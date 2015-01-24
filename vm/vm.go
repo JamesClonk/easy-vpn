@@ -52,6 +52,13 @@ func GetEasyVpn(p provider.API, sshkeyId string, vmName string) (vm provider.VM)
 
 	// make sure its up and running
 	statusOfVM(p, &vm)
+
+	// wait a few seconds in between status and readyness check if this was a newly created vm
+	// to allow sshd to be ready for accepting connections
+	if !vmExists {
+		time.Sleep(10 * time.Second)
+	}
+
 	// this is needed because some providers such as vultr do a dist-upgrade on new vms
 	readynessOfVM(p, &vm)
 

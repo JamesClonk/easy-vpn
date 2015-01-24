@@ -117,7 +117,7 @@ func startVpn(c *cli.Context) {
 	fmt.Fprintf(writer, "Id: %s\tName: %s\tIP: %s\n", machine.Id, machine.Name, machine.IP)
 	fmt.Fprintf(writer, "OS: %s\tRegion: %s\tStatus: %s\n", machine.OS, machine.Region, machine.Status)
 	writer.Flush()
-	fmt.Println("=========================================================================")
+	fmt.Println("=========================================================================\n")
 
 	// generate username & password for pptpd
 	username := rng.GenerateUsername()
@@ -138,7 +138,7 @@ func startVpn(c *cli.Context) {
 		fmt.Println("Setup self-destruct mechanism for virtual machine")
 		ssh.WriteSelfDestruct(p, machine.IP, p.GetConfig().SelfDestructFile)
 		ssh.Call(p, machine.IP,
-			fmt.Sprintf(`./self-destruct.sh %s %s %s %s &`,
+			fmt.Sprintf(`nohup ./self-destruct.sh %s %s %s %d &`,
 				p.GetConfig().Provider,
 				p.GetConfig().Providers[p.GetConfig().Provider].ApiKey,
 				machine.Id, p.GetConfig().Options.Uptime))

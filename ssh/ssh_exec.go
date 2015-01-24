@@ -57,7 +57,7 @@ func WriteSelfDestruct(p provider.API, ip string, filename string) {
 		defer writer.Close()
 
 		fmt.Fprintln(writer, "C0750", len(data), "self-destruct.sh")
-		fmt.Fprint(writer, data)
+		fmt.Fprint(writer, string(data))
 		fmt.Fprint(writer, "\x00")
 	}()
 

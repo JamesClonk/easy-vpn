@@ -17,6 +17,8 @@ API_KEY=$2
 VM_ID=$3
 UPTIME=$4
 
+echo "Called ./self-destruct.sh ${PROVIDER} ${API_KEY} ${VM_ID} ${UPTIME}"
+
 function destroyVM {
 	if [[ $PROVIDER == "digitalocean" ]]; then
 		echo "curl -X DELETE -i -H \"Authorization: Bearer ${API_KEY}\" \"https://api.digitalocean.com/v2/droplets/${VM_ID}\""

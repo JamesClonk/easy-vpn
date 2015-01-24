@@ -119,29 +119,31 @@ func startVpn(c *cli.Context) {
 	writer.Flush()
 	fmt.Println("=========================================================================\n")
 
-	// generate username & password for pptpd
-	username := rng.GenerateUsername()
-	password := rng.GeneratePassword()
-
 	// check if docker pptpd is already running
 	out := ssh.Exec(p, machine.IP, `ps -ef | grep pptpd | grep -v grep; echo "..."`)
 	if strings.Contains(out, "pptpd") {
 		fmt.Println("pptpd is already running on virtual machine")
+		fmt.Println("Please use previously generated username and password to setup pptp connection")
+		os.Exit(1)
 	} else {
 		// update machine
 		fmt.Println("Update virtual machine")
 		ssh.Call(p, machine.IP, `apt-get update -qq`)
-		ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables curl`)
+		ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables curl at`)
 		ssh.Exec(p, machine.IP, `service pptpd stop`)
 
 		// setup self-destruct
 		fmt.Println("Setup self-destruct mechanism for virtual machine")
 		ssh.WriteSelfDestruct(p, machine.IP, p.GetConfig().SelfDestructFile)
-		ssh.Call(p, machine.IP,
-			fmt.Sprintf(`nohup ./self-destruct.sh %s %s %s %d &`,
+		ssh.Call(p, machine.IP, // abuse at for background task
+			fmt.Sprintf(`echo "/bin/bash /root/self-destruct.sh %s %s %s %d" | at now`,
 				p.GetConfig().Provider,
 				p.GetConfig().Providers[p.GetConfig().Provider].ApiKey,
-				machine.Id, p.GetConfig().Options.Uptime))
+				machine.Id, p.GetConfig().Options.Uptime*60))
+
+		// generate username & password for pptpd
+		username := rng.GenerateUsername()
+		password := rng.GeneratePassword()
 
 		// setup docker
 		fmt.Println("Setup docker on virtual machine")
@@ -154,17 +156,19 @@ func startVpn(c *cli.Context) {
 		ssh.Call(p, machine.IP, `docker run --name pptpd --privileged -d -p 1723:1723 -v /chap-secrets:/etc/ppp/chap-secrets:ro jamesclonk/docker-pptpd`)
 
 		log.Printf("docker-pptpd started, with username [%s] and password [%s]\n", username, password)
+
+		// connect to vpn server if autoconnect option is on
+		if p.GetConfig().Options.Autoconnect {
+			fmt.Println("Connect to VPN")
+			connect(
+				p.GetConfig().Options.ConnectCmd,
+				machine.IP,
+				username,
+				password,
+			)
+		}
 	}
 
-	// connect to vpn server if autoconnect option is on
-	if p.GetConfig().Options.Autoconnect {
-		connect(
-			p.GetConfig().Options.ConnectCmd,
-			machine.IP,
-			username,
-			password,
-		)
-	}
 }
 
 func destroyVpn(c *cli.Context) {

@@ -1,6 +1,7 @@
 provider = "vultr"
 ssh_private_key = "../fixtures/vps_rsa"
 ssh_public_key = "../fixtures/vps_rsa.pub"
+self_destruct = "../self-destruct.sh"
 sleeptime = 5
 
 [providers.aws]
@@ -22,7 +23,6 @@ size = "2"
 os = "128"
 
 [options]
-max_idletime = 20 # minutes
 max_uptime = 300 # minutes
 vpn_autoconnect = false
 autoconnect_cmd = [

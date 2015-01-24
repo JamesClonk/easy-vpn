@@ -34,14 +34,12 @@ func Test_Main_ParseGlobalOptions(t *testing.T) {
 	set.String("provider", "", "")
 	set.String("api-key", "", "")
 	set.String("autoconnect", "", "")
-	set.String("idletime", "", "")
 	set.String("uptime", "", "")
 
 	assert.Nil(t, set.Parse([]string{"--config", "fixtures/config_test.toml"}))
 	assert.Nil(t, set.Parse([]string{"--provider", "aws"}))
 	assert.Nil(t, set.Parse([]string{"--api-key", "abcdef1234567890"}))
 	assert.Nil(t, set.Parse([]string{"--autoconnect", "TRUE"}))
-	assert.Nil(t, set.Parse([]string{"--idletime", "123"}))
 	assert.Nil(t, set.Parse([]string{"--uptime", "777"}))
 
 	c := cli.NewContext(nil, set, set)
@@ -54,7 +52,6 @@ func Test_Main_ParseGlobalOptions(t *testing.T) {
 		assert.Equal(t, "7", cfg.Providers[cfg.Provider].Size)
 		assert.Equal(t, "999", cfg.Providers[cfg.Provider].OS)
 		assert.Equal(t, true, cfg.Options.Autoconnect)
-		assert.Equal(t, 123, cfg.Options.Idletime)
 		assert.Equal(t, 777, cfg.Options.Uptime)
 	}
 

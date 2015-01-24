@@ -22,13 +22,13 @@ func Test_Config_LoadConfiguration(t *testing.T) {
 		assert.Equal(t, "vultr", cfg.Provider)
 		assert.Equal(t, "../fixtures/vps_rsa", cfg.PrivateKeyFile)
 		assert.Equal(t, "../fixtures/vps_rsa.pub", cfg.PublicKeyFile)
+		assert.Equal(t, "../self-destruct.sh", cfg.SelfDestructFile)
 		assert.Equal(t, 5, cfg.Sleep)
 	}
 }
 
 func Test_Config_LoadConfiguration_Options(t *testing.T) {
 	if assert.NotNil(t, cfg) {
-		assert.Equal(t, 20, cfg.Options.Idletime)
 		assert.Equal(t, 300, cfg.Options.Uptime)
 		assert.Equal(t, false, cfg.Options.Autoconnect)
 		assert.Equal(t, [][]string{[]string{"connect", "$IP", "$USER", "$PASS"},

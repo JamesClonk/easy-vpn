@@ -5,12 +5,13 @@ import (
 )
 
 type Config struct {
-	Provider       string              `toml:"provider"`
-	PrivateKeyFile string              `toml:"ssh_private_key"`
-	PublicKeyFile  string              `toml:"ssh_public_key"`
-	Sleep          int                 `toml:"sleeptime"`
-	Providers      map[string]Provider `toml:"providers"`
-	Options        Options             `toml:"options"`
+	Provider         string              `toml:"provider"`
+	PrivateKeyFile   string              `toml:"ssh_private_key"`
+	PublicKeyFile    string              `toml:"ssh_public_key"`
+	SelfDestructFile string              `toml:"self_destruct"`
+	Sleep            int                 `toml:"sleeptime"`
+	Providers        map[string]Provider `toml:"providers"`
+	Options          Options             `toml:"options"`
 }
 
 type Provider struct {
@@ -21,7 +22,6 @@ type Provider struct {
 }
 
 type Options struct {
-	Idletime    int        `toml:"max_idletime"`
 	Uptime      int        `toml:"max_uptime"`
 	Autoconnect bool       `toml:"vpn_autoconnect"`
 	ConnectCmd  [][]string `toml:"autoconnect_cmd"`

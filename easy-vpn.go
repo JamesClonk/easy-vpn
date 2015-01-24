@@ -38,7 +38,7 @@ func main() {
 	app.Author = "JamesClonk"
 	app.Email = "jamesclonk@jamesclonk.ch"
 	app.Version = VERSION
-	app.Usage = "a simple tool to spin up a VPN server on a cloud VPS that self-destructs after idle time"
+	app.Usage = "a simple tool to spin up a VPN server on a cloud VPS that self-destructs after reaching a max. uptime"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -60,11 +60,6 @@ func main() {
 			Name:  "autoconnect, a",
 			Value: "true",
 			Usage: "do automatic VPN connect after a VPS was started?",
-		},
-		cli.StringFlag{
-			Name:  "idletime, i",
-			Value: "15",
-			Usage: "idle time in minutes after which the VPS will self-destruct",
 		},
 		cli.StringFlag{
 			Name:  "uptime, u",
@@ -136,8 +131,17 @@ func startVpn(c *cli.Context) {
 		// update machine
 		fmt.Println("Update virtual machine")
 		ssh.Call(p, machine.IP, `apt-get update -qq`)
-		ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables`)
+		ssh.Call(p, machine.IP, `apt-get install -qy docker.io pptpd iptables curl`)
 		ssh.Exec(p, machine.IP, `service pptpd stop`)
+
+		// setup self-destruct
+		fmt.Println("Setup self-destruct mechanism for virtual machine")
+		ssh.WriteSelfDestruct(p, machine.IP, p.GetConfig().SelfDestructFile)
+		ssh.Call(p, machine.IP,
+			fmt.Sprintf(`./self-destruct.sh %s %s %s %s &`,
+				p.GetConfig().Provider,
+				p.GetConfig().Providers[p.GetConfig().Provider].ApiKey,
+				machine.Id, p.GetConfig().Options.Uptime))
 
 		// setup docker
 		fmt.Println("Setup docker on virtual machine")
@@ -229,14 +233,6 @@ func parseGlobalOptions(c *cli.Context) *config.Config {
 
 	if c.GlobalIsSet("autoconnect") {
 		cfg.Options.Autoconnect = strings.ToLower(c.GlobalString("autoconnect")) == "true"
-	}
-
-	if c.GlobalIsSet("idletime") {
-		idletime, err := strconv.ParseInt(c.GlobalString("idletime"), 10, 32)
-		if err != nil {
-			log.Fatalf("Invalid value for --idletime option given: %v\n", c.GlobalString("idletime"))
-		}
-		cfg.Options.Idletime = int(idletime)
 	}
 
 	if c.GlobalIsSet("uptime") {

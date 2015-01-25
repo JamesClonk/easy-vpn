@@ -5,7 +5,7 @@ a simple commandline tool to spin up a VPN server on a cloud VPS that self-destr
 
 --------
 
-* Requires [Go](https://golang.org/)
+* Requires [Go 1.4+](https://golang.org/)
 
 ### Installation
 

@@ -38,7 +38,7 @@ func main() {
 	app.Author = "JamesClonk"
 	app.Email = "jamesclonk@jamesclonk.ch"
 	app.Version = VERSION
-	app.Usage = "a simple tool to spin up a VPN server on a cloud VPS that self-destructs after reaching a max. uptime"
+	app.Usage = "A simple tool to spin up a VPN server on a cloud VPS that self-destructs after reaching a max. uptime"
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -71,7 +71,7 @@ func main() {
 	app.Commands = []cli.Command{{
 		Name:        "up",
 		ShortName:   "u",
-		Usage:       "spin up new vm",
+		Usage:       "Spin up new vm",
 		Description: "Creates a new easy-vpn virtual machine and starts a docker-pptpd container in it.",
 		Flags: []cli.Flag{
 			cli.StringFlag{
@@ -85,7 +85,7 @@ func main() {
 	}, {
 		Name:        "down",
 		ShortName:   "d",
-		Usage:       "shutdown and destroy",
+		Usage:       "Shutdown and destroy",
 		Description: "Destroys/deletes the easy-vpn virtual machine if it exists.",
 		Action: func(c *cli.Context) {
 			destroyVpn(c)
@@ -93,7 +93,7 @@ func main() {
 	}, {
 		Name:        "show",
 		ShortName:   "s",
-		Usage:       "show all vm's",
+		Usage:       "Show all vm's",
 		Description: "Lists all your currently existing virtual machines.",
 		Action: func(c *cli.Context) {
 			showVpn(c)

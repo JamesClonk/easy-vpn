@@ -1,18 +1,27 @@
 # easy-vpn
 a simple commandline tool to spin up a VPN server on a cloud VPS that self-destructs after reaching a max. uptime
 
+![Screenshot](https://github.com/JamesClonk/easy-vpn/raw/master/screenshot.png "Screenshot")
+
 --------
 
-* Requires Go 1.4+
+* Requires [Go](https://golang.org/)
 
-## TODO
+### Installation
 
-* DO/vultr/aws selfdestruct shellscript
-	- shellscript that makes API call to DO/vultr/aws control to selfdestruct the vm it is running in
+`go get github.com/JamesClonk/easy-vpn`
 
-* github pages website with documentation about usage of tool
+### Configuration
 
-* screenshots of tool. everybody likes screenshots!
+`vim easy-vpn.toml`
 
-### notes
-* make it absolutely clear in README.md that this project is NOT, *ABSOLUTELY NOT* intended to provide any privacy or security
+### Usage
+
+`easy-vpn help`
+
+Currently supports DigitalOcean and VULTR.
+
+=============
+
+#### Notes
+* This project is NOT, *ABSOLUTELY NOT* intended to provide privacy or security

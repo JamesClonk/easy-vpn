@@ -1,25 +1,47 @@
+# ==============================================================================
+# easy-vpn configuration file
+
+
+# ==============================================================================
+# which VPS provider to use (see further configuration for any particular VPS providers below)
 provider = "digitalocean"
+
+# private/public keyfiles to use
 ssh_private_key = "~/.ssh/vps_rsa"
 ssh_public_key = "~/.ssh/vps_rsa.pub"
-self_destruct = "self-destruct.sh"
-sleeptime = 1500 # how many milliseconds to wait between API calls (because of request rate limitations)
 
+# self-destruct shellscript, will be uploaded and runs on VPS
+self_destruct = "self-destruct.sh"
+
+# how many milliseconds to wait between API calls (because of request rate limitations)
+sleeptime = 1500
+
+
+# ==============================================================================
+# configuration sections for VPS provider specific settings
 [providers.digitalocean]
-api_key = "abcdefg123xyz"
+api_key = "abcdefg123xyz" # get it from your VPS providers admin panel
 region = "nyc3"
 size = "512mb"
 os = "ubuntu-14-04-x64" # slug for Ubuntu 14.04 x64
 
 [providers.vultr]
-api_key = "abcdefg123xyz"
+api_key = "abcdefg123xyz" # get it from your VPS providers admin panel
 region = "1" # 1 = New Jersey
 size = "11" # 11 = 512 MB RAM,160 GB SATA,1.00 TB BW
 os = "160" # 160 = Ubuntu 14.04 x64
 
+
+# ==============================================================================
+# other settings
 [options]
-max_uptime = 360 # minutes
-vpn_autoconnect = true
-# command(s) to run to automatically connect to vpn server
+# number of minutes of maximum uptime for VPS before it self-destructs
+max_uptime = 360
+
+# should easy-vpn try to establish a VPN connection after VPS setup?
+# (if "true", then it will use below "autoconnect_cmd" to do so)
+vpn_autoconnect = false
+# command(s) to run to automatically connect to VPN server
 # understands these 3 variables: $IP, $USER, $PASS
 autoconnect_cmd = [
 	["pptpsetup","--create","easyvpn","--server","$IP","--username","$USER","--password","$PASS","--encrypt","--start"],
